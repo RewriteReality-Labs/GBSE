@@ -28,6 +28,7 @@ export async function runSolver(client, query, auditCritique = null) {
     model: process.env.GBSE_MODEL || "claude-sonnet-4-20250514",
     max_tokens: maxTokens,
     system: SOLVER_PROMPT,
+    tools: [{ type: "web_search_20250305", name: "web_search" }],
     messages: [{ role: "user", content: userMessage }],
   });
 
