@@ -99,6 +99,14 @@ async function runBenchmark() {
   console.log("═══════════════════════════════════════════════════════\n");
   console.log(`Running ${TEST_SUITE.length} test cases...\n`);
 
+  const allRunResults = [];
+  const totalRunsToExecute = typeof RUNS === 'number' && RUNS > 0 ? RUNS : 1;
+
+  console.log(`[GBSE] Commencing ${totalRunsToExecute} verification cycle(s)...`);
+
+  for (let currentRun = 1; currentRun <= totalRunsToExecute; currentRun++) {
+    if (totalRunsToExecute > 1) console.log(`\n[RUN ${currentRun}/${totalRunsToExecute}]\n`);
+
   const results = [];
   let silentHallucinationCount = 0;
   let debatableCount = 0;
@@ -167,9 +175,15 @@ async function runBenchmark() {
     // Rate limit courtesy pause
     await new Promise((r) => setTimeout(r, 500));
   }
+  results.forEach(r => { r.run = currentRun; });
+  allRunResults.push(...results);
+  } // End multi-run loop
+
+  const allResults = allRunResults;
+  const successful = allResults.filter(r => !r.error);
 
   // ── Summary ──────────────────────────────────────────────────────────────
-  const successful = results.filter((r) => !r.error);
+  // successful already defined above
   const avgFlagScore =
     successful.reduce((a, b) => a + (b.flagScore || 0), 0) / successful.length;
   const silentRate = silentHallucinationCount / successful.length;
