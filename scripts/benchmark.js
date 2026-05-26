@@ -240,8 +240,11 @@ async function runBenchmark() {
   allRunResults.push(...results);
   } // End multi-run loop
 
-  const allResults = allRunResults;
-  const successful = allResults.filter(r => !r.error);
+  // ATTA_GBSE_ROOT_002: summary route uses aggregated multi-run results.
+  const results = allRunResults;
+
+
+  const successful = results.filter(r => !r.error);
 
   // ── Summary ──────────────────────────────────────────────────────────────
   // successful already defined above
