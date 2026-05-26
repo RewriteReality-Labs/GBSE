@@ -19,6 +19,32 @@ import { fileURLToPath } from "url";
 import { runPipeline } from "../src/index.js";
 import { TEST_SUITE } from "../tests/suite.js";
 
+
+import { createHash } from 'crypto';
+import { execSync } from 'child_process';
+
+function hashFile(p) {
+  try { return createHash('sha256').update(readFileSync(p)).digest('hex').slice(0,12); }
+  catch { return 'unavailable'; }
+}
+
+function buildProvenance() {
+  let repoCommit = 'unavailable';
+  try { repoCommit = execSync('git rev-parse HEAD', {stdio:'pipe'}).toString().trim().slice(0,12); } catch {}
+  return {
+    repoCommit,
+    suiteHash: hashFile('tests/suite.js'),
+    auditorPromptHash: hashFile('prompts/v1/auditor.txt'),
+    solverPromptHash: hashFile('prompts/v1/solver.txt'),
+    reconstructorPromptHash: hashFile('prompts/v1/reconstructor.txt'),
+    benchmarkScriptHash: hashFile('scripts/benchmark.js'),
+    model: process.env.GBSE_MODEL || 'claude-sonnet-4-20250514',
+    temperature: 0,
+    maxIterations: parseInt(process.env.GBSE_MAX_ITERATIONS || '3'),
+    runMode: process.env.GBSE_OFFICIAL ? 'official' : 'local',
+  };
+}
+
 function safeDivide(a, b) { return b === 0 ? 0 : a / b; }
 
 function aggregateByField(results, field) {
@@ -74,7 +100,9 @@ export function calculateMetrics(results) {
   };
 }
 
-const RESULTS_FILE = "benchmark-results.json";
+const RUNS = parseInt(process.argv.find(a => a.startsWith('--runs='))?.split('=')[1] || '1');
+const IS_OFFICIAL = !!process.env.GBSE_OFFICIAL;
+const RESULTS_FILE = IS_OFFICIAL ? 'benchmark-results.json' : 'benchmark-results.local.json';
 
 async function runBenchmark() {
   console.log("═══════════════════════════════════════════════════════");

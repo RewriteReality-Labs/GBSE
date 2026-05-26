@@ -9,9 +9,16 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit --detectOpenHandles",
     "audit-diff": "node scripts/audit-diff.js",
     "benchmark": "node scripts/benchmark.js",
-    "demo": "node scripts/demo.js"
+    "demo": "node scripts/demo.js",
+    "benchmark:official": "GBSE_OFFICIAL=true node scripts/benchmark.js --runs=3"
   },
-  "keywords": ["ai", "hallucination", "verification", "llm", "anthropic"],
+  "keywords": [
+    "ai",
+    "hallucination",
+    "verification",
+    "llm",
+    "anthropic"
+  ],
   "author": "RewriteReality Labs",
   "license": "MIT",
   "dependencies": {
