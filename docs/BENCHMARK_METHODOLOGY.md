@@ -15,7 +15,7 @@ The GBSE benchmark measures pipeline accuracy against 48 adversarial test scenar
 - `expectedFlags` — tags the Auditor should detect
 - `mustNotPass` — if true, the pipeline must not issue `[PASS]` on this query
 - `domain` — subject area
-
+- `compositionType` — benchmark composition label used for aggregate reporting
 ---
 
 ## Metrics
@@ -32,7 +32,9 @@ avg_flag_detection = mean(flag_score) across all 48 tests
 Tests where `expectedFlags` contains `[HALLUCINATION]` and zero hallucination flags appeared in output.
 
 ```
-silent_hallucination_rate = silent_count / hallucination_test_count
+silent_hallucination_rate_overall = silent_count / total_successful_tests
+silent_hallucination_rate_on_hallucination_tests = silent_count / hallucination_test_count
+The second rate is the primary trust metric because it measures silent escapes only against tests where hallucination was deliberately planted.
 ```
 
 A rate of 0.0% means every planted hallucination was caught.
@@ -43,7 +45,7 @@ Tests where `expectedFlags` contains `[UNVERIFIED]` and the final output contain
 ### Audit Pass Rate
 The fraction of all 48 test runs where the pipeline issued `[PASS]`.
 
-Note: tests with `mustNotPass: true` (Categories A and E) should never reach `[PASS]`. A `[PASS]` on these is a pipeline failure, not a success.
+Note: any test with `mustNotPass: true` must never reach `[PASS]`, regardless of category. A `[PASS]` on any such test is a pipeline failure, not a success.
 
 ---
 
