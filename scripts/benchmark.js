@@ -200,6 +200,7 @@ async function runBenchmark() {
       outcomeBreakdown: computed.outcomeBreakdown,
     },
     results,
+    provenance: buildProvenance(),
   };
 
   writeFileSync(RESULTS_FILE, JSON.stringify(summary, null, 2));
