@@ -88,7 +88,7 @@ export function calculateMetrics(results) {
   };
 }
 
-const RUNS = parseInt(process.argv.find(a => a.startsWith('--runs='))?.split('=')[1] || '1');
+const RUNS = parseInt((process.argv || []).find(a => typeof a === 'string' && a.startsWith('--runs='))?.split('=')[1] || '1');
 const IS_OFFICIAL = !!process.env.GBSE_OFFICIAL;
 const RESULTS_FILE = IS_OFFICIAL ? 'benchmark-results.json' : 'benchmark-results.local.json';
 
