@@ -6,3 +6,8 @@ __pycache__/
 .DS_Store
 dist/
 coverage/
+
+# Temporary patch scripts
+_*.mjs
+_*.cjs
+_*.js
