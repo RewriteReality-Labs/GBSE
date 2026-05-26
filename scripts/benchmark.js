@@ -19,6 +19,20 @@ import { fileURLToPath } from "url";
 import { runPipeline } from "../src/index.js";
 import { TEST_SUITE } from "../tests/suite.js";
 
+function buildProvenance() {
+  let repoCommit = 'unavailable';
+  try {
+    const { execSync } = require('child_process');
+    repoCommit = execSync('git rev-parse HEAD', {stdio:'pipe'}).toString().trim().slice(0,12);
+  } catch {}
+  return {
+    repoCommit,
+    model: process.env.GBSE_MODEL || 'claude-sonnet-4-20250514',
+    temperature: 0,
+    runMode: process.env.GBSE_OFFICIAL ? 'official' : 'local',
+  };
+}
+
 function safeDivide(a, b) { return b === 0 ? 0 : a / b; }
 
 function aggregateByField(results, field) {
@@ -74,7 +88,9 @@ export function calculateMetrics(results) {
   };
 }
 
-const RESULTS_FILE = "benchmark-results.json";
+const RUNS = parseInt(process.argv.find(a => a.startsWith('--runs='))?.split('=')[1] || '1');
+const IS_OFFICIAL = !!process.env.GBSE_OFFICIAL;
+const RESULTS_FILE = IS_OFFICIAL ? 'benchmark-results.json' : 'benchmark-results.local.json';
 
 async function runBenchmark() {
   console.log("═══════════════════════════════════════════════════════");
