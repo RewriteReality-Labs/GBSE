@@ -16,25 +16,39 @@
 import "dotenv/config";
 import { writeFileSync } from "fs";
 import { execSync as _execSync } from "child_process";
+import { createHash } from "crypto";
 import { fileURLToPath } from "url";
 import { runPipeline } from "../src/index.js";
 import { TEST_SUITE } from "../tests/suite.js";
 
+function hashFile(p) {
+  try {
+    return createHash('sha256').update(readFileSync(p)).digest('hex').slice(0,16);
+  } catch { return 'unavailable'; }
+}
+
 function buildProvenance() {
   let repoCommit = 'unavailable';
   try {
-    const execSync = _execSync;
-    repoCommit = execSync('git rev-parse HEAD', {stdio:'pipe'}).toString().trim().slice(0,12);
+    repoCommit = _execSync('git rev-parse HEAD', {stdio:'pipe'}).toString().trim().slice(0,12);
   } catch {}
   return {
     repoCommit,
+    solverPromptHash: hashFile('prompts/v1/solver.txt'),
+    auditorPromptHash: hashFile('prompts/v1/auditor.txt'),
+    reconstructorPromptHash: hashFile('prompts/v1/reconstructor.txt'),
+    suiteHash: hashFile('tests/suite.js'),
+    benchmarkScriptHash: hashFile('scripts/benchmark.js'),
+    packageLockHash: hashFile('package-lock.json'),
     model: process.env.GBSE_MODEL || 'claude-sonnet-4-20250514',
     temperature: 0,
+    maxIterations: parseInt(process.env.GBSE_MAX_ITERATIONS || '3'),
+    totalRunsExecuted: typeof RUNS !== 'undefined' ? RUNS : 1,
     runMode: process.env.GBSE_OFFICIAL ? 'official' : 'local',
   };
 }
 
-function safeDivide(a, b) { return b === 0 ? 0 : a / b; }
+function safeDivide(a, b) { if (b === 0 || isNaN(b)) return 0; const res = a / b; return isNaN(res) || !isFinite(res) ? 0 : res; }
 
 function aggregateByField(results, field) {
   return results.reduce((acc, r) => {
@@ -52,6 +66,33 @@ function classifyOutcome(result) {
   if (!result.passed && (result.findingsCount || 0) === 0) return "UNEXPECTED_FAIL";
   return "UNKNOWN";
 }
+
+
+function computePerTestStability(results) {
+  const byId = {};
+  results.forEach(r => {
+    if (!byId[r.id]) byId[r.id] = [];
+    byId[r.id].push(r);
+  });
+  return Object.entries(byId).map(([id, runs]) => {
+    const passCount = runs.filter(r => r.passed).length;
+    const silentEscapes = runs.filter(r => r.silentHallucination).length;
+    const flagScores = runs.map(r => r.flagScore || 0);
+    const avgFlagScore = safeDivide(flagScores.reduce((a,b)=>a+b,0), flagScores.length);
+    return {
+      id,
+      runs: runs.length,
+      passRate: safeDivide(passCount, runs.length),
+      minFlagScore: Math.min(...flagScores),
+      maxFlagScore: Math.max(...flagScores),
+      avgFlagScore,
+      silentEscapes,
+      unstable: silentEscapes > 0 || (Math.max(...flagScores) - Math.min(...flagScores)) > 0.3,
+    };
+  });
+}
+
+
 
 export function calculateMetrics(results) {
   if (!results || results.length === 0) return { totalTests: 0, silentHallucinationRateOverall: 0, silentHallucinationRateOnHallucinationTests: 0, auditPassRate: 0, avgFindingsPerQuery: 0, totalDebatableLabels: 0, avgFlagDetectionScore: 0, mustNotPassFailureCount: 0, cleanQueryPassRate: 0, adversarialRejectionRate: 0, falsePremiseRejectionRate: 0, injectionRejectionRate: 0, debatableToHallucinationRatio: 0, suiteComposition: {}, outcomeBreakdown: {} };
@@ -86,7 +127,26 @@ export function calculateMetrics(results) {
     debatableToHallucinationRatio: safeDivide(totalDebatable, totalHall),
     suiteComposition: { byCategory: aggregateByField(results,"category"), byCompositionType: aggregateByField(results,"compositionType") },
     outcomeBreakdown,
+    perTestStability: computePerTestStability(results),
   };
+}
+
+
+export function extractPipelineSignals(auditOutput, expectedFlags = []) {
+  if (!auditOutput || typeof auditOutput !== 'string') {
+    return { hallucinationCaught: 0, debatableCount: 0 };
+  }
+  const cleanOutput = auditOutput.replace(/[`*_]/g, '').trim();
+  const hallucinationRegex = /[s*HALLUCINATIONs*]/i;
+  const hasHallucinationSignal = hallucinationRegex.test(cleanOutput);
+  const hallucinationCaught = (
+    expectedFlags.map(f => f.toUpperCase()).includes("HALLUCINATION") &&
+    hasHallucinationSignal
+  ) ? 1 : 0;
+  const debatableRegex = /\[DEBATABLE\]/gi;
+  const debatableMatches = cleanOutput.match(debatableRegex);
+  const debatableCount = debatableMatches ? debatableMatches.length : 0;
+  return { hallucinationCaught, debatableCount };
 }
 
 const RUNS = parseInt((process.argv || []).find(a => typeof a === 'string' && a.startsWith('--runs='))?.split('=')[1] || '1');
@@ -216,6 +276,8 @@ async function runBenchmark() {
     },
     results,
     provenance: buildProvenance(),
+    officialValid: allRunResults.length === TEST_SUITE.length * totalRunsToExecute && allRunResults.filter(r => r.error).length === 0,
+    apiErrorRate: (allRunResults.filter(r => r.error).length / allRunResults.length).toFixed(3),
   };
 
   writeFileSync(RESULTS_FILE, JSON.stringify(summary, null, 2));

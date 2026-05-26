@@ -44,7 +44,8 @@ export async function runAuditor(client, solverAnswer) {
   const raw = message.content[0].text;
 
   // Parse verdict
-  const passed = raw.includes("VERDICT: [PASS]");
+  const verdictMatch = raw.match(/VERDICT:\s*\[(PASS|FAIL)\]/i);
+const passed = verdictMatch?.[1]?.toUpperCase() === "PASS";
 
   // Parse findings
   const findingsMatch = raw.match(/AUDIT_FINDINGS:\s*([\s\S]*?)(?=VERDICT:|$)/);
@@ -64,7 +65,7 @@ export async function runAuditor(client, solverAnswer) {
 function parseFinding(raw) {
   const lines = raw.split("\n").filter((l) => l.trim());
   return lines.map((line) => {
-    const tagMatch = line.match(/\[(HALLUCINATION|FLUFF|GAP|UNVERIFIED)\]/);
+    const tagMatch = line.match(/\[(HALLUCINATION|FLUFF|GAP|UNVERIFIED)\]/i);
     return {
       tag: tagMatch ? tagMatch[1] : "UNKNOWN",
       text: line.trim(),
