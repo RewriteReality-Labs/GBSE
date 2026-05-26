@@ -78,7 +78,8 @@ function computePerTestStability(results) {
     const passCount = runs.filter(r => r.passed).length;
     const silentEscapes = runs.filter(r => r.silentHallucination).length;
     const flagScores = runs.map(r => r.flagScore || 0);
-    const avgFlagScore = safeDivide(flagScores.reduce((a,b)=>a+b,0), flagScores.length);
+
+  const avgFlagScore = safeDivide(flagScores.reduce((a,b)=>a+b,0), flagScores.length);
     return {
       id,
       runs: runs.length,
@@ -244,10 +245,16 @@ async function runBenchmark() {
 
   // ── Summary ──────────────────────────────────────────────────────────────
   // successful already defined above
+  // ATTA_GBSE_FIX_001: summary-scope counters derived from aggregated successful results.
+  const summarySilentHallucinationCount = successful.filter((r) => r.silentHallucination).length;
+  const summaryPassCount = successful.filter((r) => r.passed).length;
+  const summaryDebatableCount = successful.reduce((s, r) => s + (r.debatableLabels || 0), 0);
+  const summaryTotalFindings = successful.reduce((s, r) => s + (r.findingsCount || 0), 0);
+
   const avgFlagScore =
     successful.reduce((a, b) => a + (b.flagScore || 0), 0) / successful.length;
-  const silentRate = silentHallucinationCount / successful.length;
-  const passRate = passCount / successful.length;
+  const silentRate = successful.length ? summarySilentHallucinationCount / successful.length : 0;
+  const passRate = successful.length ? summaryPassCount / successful.length : 0;
 
   const computed = calculateMetrics(successful);
 
@@ -261,8 +268,8 @@ async function runBenchmark() {
       avgFlagDetectionScore: (avgFlagScore * 100).toFixed(1) + "%",
       silentHallucinationRate: (silentRate * 100).toFixed(1) + "%",
       auditPassRate: (passRate * 100).toFixed(1) + "%",
-      totalDebatableLabels: debatableCount,
-      avgFindingsPerQuery: (totalFindings / successful.length).toFixed(1),
+      totalDebatableLabels: summaryDebatableCount,
+      avgFindingsPerQuery: (successful.length ? summaryTotalFindings / successful.length : 0).toFixed(1),
       silentHallucinationRateOverall: (computed.silentHallucinationRateOverall * 100).toFixed(1) + "%",
       silentHallucinationRateOnHallucinationTests: (computed.silentHallucinationRateOnHallucinationTests * 100).toFixed(1) + "%",
       mustNotPassFailureCount: computed.mustNotPassFailureCount,
