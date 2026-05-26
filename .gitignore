@@ -14,3 +14,6 @@ _*.js
 
 benchmark-results.json
 benchmark-results.local.json
+
+benchmark-results.json
+benchmark-results.local.json
