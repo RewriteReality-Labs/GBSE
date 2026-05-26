@@ -125,7 +125,7 @@ export async function runPipeline(query, options = {}) {
 }
 
 // ── CLI entry point ───────────────────────────────────────────────────────────
-if (process.argv[1].endsWith("index.js")) {
+if (process.argv[1]?.endsWith("index.js")) {
   const query = process.argv.slice(2).join(" ");
   if (!query) {
     console.error("Usage: node src/index.js <your query here>");
