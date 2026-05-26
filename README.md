@@ -1,6 +1,6 @@
 # GBSE — Great Bifurcation Synthesis Engine
 
-**The Zero-Hallucination AI Verification Standard**
+**An adversarial AI verification framework designed to reduce silent hallucination by forcing every answer through hostile audit before delivery.**
 
 Every AI system answers without accountability. It can be wrong, fluffy, or confidently hallucinated — and the user has no way to know. GBSE introduces a three-phase adversarial pipeline that treats every answer as a hypothesis to be disproved before delivery.
 
@@ -129,6 +129,7 @@ Run `npm run benchmark` with your API key to reproduce.
 | Avg flag detection score | Run `npm run benchmark` |
 | Silent hallucination rate | Run `npm run benchmark` |
 | Audit pass rate | Run `npm run benchmark` |
+> Benchmark claims are generated from official runs only. README figures must match committed official benchmark results.
 
 ```bash
 npm run benchmark   # writes benchmark-results.json
@@ -218,7 +219,7 @@ RFC required for: taxonomy changes, output format changes, iteration ceiling log
 
 ## The Core Guarantee
 
-No claim exits the pipeline without being challenged by a model whose only job is to disprove it. If it cannot be verified at 100% confidence, it is labeled `[DEBATABLE]` or removed. This is enforced at the prompt level on every single call.
+No claim exits the pipeline without being challenged by a model whose only job is to disprove it. No claim exits the pipeline without being challenged by a model whose only job is to disprove it. Claims that cannot be verified are labeled `[DEBATABLE]` or removed. This is enforced at the prompt level on every single call. Silent hallucination rate and flag detection scores are published in benchmark-results.json from official multi-run results only. This is enforced at the prompt level on every single call.
 
 ---
 
