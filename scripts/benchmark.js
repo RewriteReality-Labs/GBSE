@@ -15,6 +15,7 @@
 
 import "dotenv/config";
 import { writeFileSync } from "fs";
+import { execSync as _execSync } from "child_process";
 import { fileURLToPath } from "url";
 import { runPipeline } from "../src/index.js";
 import { TEST_SUITE } from "../tests/suite.js";
@@ -22,7 +23,7 @@ import { TEST_SUITE } from "../tests/suite.js";
 function buildProvenance() {
   let repoCommit = 'unavailable';
   try {
-    const { execSync } = require('child_process');
+    const execSync = _execSync;
     repoCommit = execSync('git rev-parse HEAD', {stdio:'pipe'}).toString().trim().slice(0,12);
   } catch {}
   return {
