@@ -1,0 +1,14 @@
+{
+  "attaId": "ATTA_GBSE_FIX_001",
+  "status": "ACKNOWLEDGED",
+  "timestamp": "2026-05-26T17:37:44.098Z",
+  "branch": "fix/auditor-regression",
+  "commitBefore": "d2ecaba8c120fae8aba1c72a456a66bfbf726734",
+  "failure": {
+    "type": "ReferenceError",
+    "message": "silentHallucinationCount is not defined",
+    "location": "scripts/benchmark.js summary block",
+    "diagnosis": "Stale single-run summary counters remained after multi-run benchmark refactor."
+  },
+  "decision": "Patch summary to use calculateMetrics(successful) as source of truth. Do not modify prompts."
+}

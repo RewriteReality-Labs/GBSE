@@ -78,8 +78,7 @@ function computePerTestStability(results) {
     const passCount = runs.filter(r => r.passed).length;
     const silentEscapes = runs.filter(r => r.silentHallucination).length;
     const flagScores = runs.map(r => r.flagScore || 0);
-
-  const avgFlagScore = safeDivide(flagScores.reduce((a,b)=>a+b,0), flagScores.length);
+    const avgFlagScore = safeDivide(flagScores.reduce((a,b)=>a+b,0), flagScores.length);
     return {
       id,
       runs: runs.length,
@@ -240,54 +239,73 @@ async function runBenchmark() {
   allRunResults.push(...results);
   } // End multi-run loop
 
-  // ATTA_GBSE_ROOT_002: summary route uses aggregated multi-run results.
-  const results = allRunResults;
-
-
-  const successful = results.filter(r => !r.error);
-
-  // ── Summary ──────────────────────────────────────────────────────────────
-  // successful already defined above
-  // ATTA_GBSE_FIX_001: summary-scope counters derived from aggregated successful results.
-  const summarySilentHallucinationCount = successful.filter((r) => r.silentHallucination).length;
-  const summaryPassCount = successful.filter((r) => r.passed).length;
-  const summaryDebatableCount = successful.reduce((s, r) => s + (r.debatableLabels || 0), 0);
-  const summaryTotalFindings = successful.reduce((s, r) => s + (r.findingsCount || 0), 0);
-
-  const avgFlagScore =
-    successful.reduce((a, b) => a + (b.flagScore || 0), 0) / successful.length;
-  const silentRate = successful.length ? summarySilentHallucinationCount / successful.length : 0;
-  const passRate = successful.length ? summaryPassCount / successful.length : 0;
-
+  const allResults = allRunResults;
+  const successful = allResults.filter((r) => !r.error);
+  const errorCount = allResults.length - successful.length;
   const computed = calculateMetrics(successful);
+
+  const pct = (n) => ((Number.isFinite(n) ? n : 0) * 100).toFixed(1) + "%";
+  const avg = (n, digits = 1) => (Number.isFinite(n) ? n : 0).toFixed(digits);
+
+  const expectedEvaluations = TEST_SUITE.length * totalRunsToExecute;
+  const actualEvaluations = allRunResults.length;
+  const apiErrors = allRunResults.filter((r) => r.error).length;
 
   const summary = {
     timestamp: new Date().toISOString(),
     model: process.env.GBSE_MODEL || "claude-sonnet-4-20250514",
+
+    suiteTests: TEST_SUITE.length,
+    runs: totalRunsToExecute,
+    expectedEvaluations,
+    totalEvaluations: actualEvaluations,
+
     totalTests: TEST_SUITE.length,
     successful: successful.length,
-    errors: results.length - successful.length,
+    errors: errorCount,
+
+    officialValid:
+      actualEvaluations === expectedEvaluations &&
+      apiErrors === 0,
+
+    apiErrorRate: avg(actualEvaluations ? apiErrors / actualEvaluations : 0, 3),
+
     metrics: {
-      avgFlagDetectionScore: (avgFlagScore * 100).toFixed(1) + "%",
-      silentHallucinationRate: (silentRate * 100).toFixed(1) + "%",
-      auditPassRate: (passRate * 100).toFixed(1) + "%",
-      totalDebatableLabels: summaryDebatableCount,
-      avgFindingsPerQuery: (successful.length ? summaryTotalFindings / successful.length : 0).toFixed(1),
-      silentHallucinationRateOverall: (computed.silentHallucinationRateOverall * 100).toFixed(1) + "%",
-      silentHallucinationRateOnHallucinationTests: (computed.silentHallucinationRateOnHallucinationTests * 100).toFixed(1) + "%",
+      avgFlagDetectionScore: pct(computed.avgFlagDetectionScore),
+      silentHallucinationRate: pct(computed.silentHallucinationRateOverall),
+      auditPassRate: pct(computed.auditPassRate),
+
+      totalDebatableLabels: computed.totalDebatableLabels,
+      avgFindingsPerQuery: avg(computed.avgFindingsPerQuery),
+
+      silentHallucinationRateOverall: pct(computed.silentHallucinationRateOverall),
+      silentHallucinationRateOnHallucinationTests: pct(
+        computed.silentHallucinationRateOnHallucinationTests
+      ),
+
       mustNotPassFailureCount: computed.mustNotPassFailureCount,
-      cleanQueryPassRate: (computed.cleanQueryPassRate * 100).toFixed(1) + "%",
-      adversarialRejectionRate: (computed.adversarialRejectionRate * 100).toFixed(1) + "%",
-      falsePremiseRejectionRate: (computed.falsePremiseRejectionRate * 100).toFixed(1) + "%",
-      injectionRejectionRate: (computed.injectionRejectionRate * 100).toFixed(1) + "%",
-      debatableToHallucinationRatio: computed.debatableToHallucinationRatio.toFixed(2),
+
+      cleanQueryPassRate: pct(computed.cleanQueryPassRate),
+      adversarialRejectionRate: pct(computed.adversarialRejectionRate),
+      falsePremiseRejectionRate: pct(computed.falsePremiseRejectionRate),
+      injectionRejectionRate: pct(computed.injectionRejectionRate),
+
+      debatableToHallucinationRatio: avg(
+        computed.debatableToHallucinationRatio,
+        2
+      ),
+
       suiteComposition: computed.suiteComposition,
       outcomeBreakdown: computed.outcomeBreakdown,
     },
-    results,
+
+    perTestStability:
+      typeof buildPerTestStability === "function"
+        ? buildPerTestStability(allResults)
+        : undefined,
+
+    results: allResults,
     provenance: buildProvenance(),
-    officialValid: allRunResults.length === TEST_SUITE.length * totalRunsToExecute && allRunResults.filter(r => r.error).length === 0,
-    apiErrorRate: (allRunResults.filter(r => r.error).length / allRunResults.length).toFixed(3),
   };
 
   writeFileSync(RESULTS_FILE, JSON.stringify(summary, null, 2));
@@ -295,15 +313,23 @@ async function runBenchmark() {
   console.log("\n═══════════════════════════════════════════════════════");
   console.log("  BENCHMARK RESULTS");
   console.log("═══════════════════════════════════════════════════════");
-  console.log(`  Tests run:               ${summary.totalTests}`);
+  console.log(`  Suite tests:             ${summary.suiteTests}`);
+  console.log(`  Runs:                    ${summary.runs}`);
+  console.log(`  Total evaluations:       ${summary.totalEvaluations}`);
+  console.log(`  Expected evaluations:    ${summary.expectedEvaluations}`);
   console.log(`  Successful:              ${summary.successful}`);
   console.log(`  Errors:                  ${summary.errors}`);
+  console.log(`  Official valid:          ${summary.officialValid}`);
   console.log(`  Avg flag detection:      ${summary.metrics.avgFlagDetectionScore}`);
   console.log(`  Silent hallucination:    ${summary.metrics.silentHallucinationRate}`);
+  console.log(`  Silent hallucination/H:  ${summary.metrics.silentHallucinationRateOnHallucinationTests}`);
   console.log(`  Audit pass rate:         ${summary.metrics.auditPassRate}`);
+  console.log(`  Must-not-pass failures:  ${summary.metrics.mustNotPassFailureCount}`);
   console.log(`  Total [DEBATABLE] labels:${summary.metrics.totalDebatableLabels}`);
   console.log(`  Avg findings/query:      ${summary.metrics.avgFindingsPerQuery}`);
-  console.log(`\n  Full results written to: ${RESULTS_FILE}`);
+  console.log(
+    `\n  Full results written to: ${RESULTS_FILE} (${summary.runs} run(s) × ${summary.suiteTests} tests = ${summary.totalEvaluations} total evaluations)`
+  );
   console.log("═══════════════════════════════════════════════════════\n");
 }
 
