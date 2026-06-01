@@ -12,5 +12,16 @@
     "mustNotPassFailureCount": "= 0",
     "officialValid": true,
     "semanticPassRate": ">= 85%"
+  },
+  "executionPreparation": {
+    "status": "READY_FOR_EXECUTION",
+    "auditBoundary": "Current main is clean, synced, syntactically valid, and test-passing. Repo integrity is repaired, benchmark runner syntax is restored, duplicate suite metadata is fixed, and ATTA_GBSE_BENCHMARK_002 remains PENDING_AFFIRMATION. Benchmark execution may now proceed only against the recorded commit hash and environment.",
+    "validatedBeforeExecution": true,
+    "branch": "main",
+    "commitHash": "PASTE_GIT_REV_PARSE_HEAD_HERE",
+    "nodeVersion": "PASTE_NODE_VERSION_HERE",
+    "npmVersion": "PASTE_NPM_VERSION_HERE",
+    "workingTreeClean": true,
+    "benchmarkExecuted": false
   }
 }
