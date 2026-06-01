@@ -1,0 +1,16 @@
+{
+  "attaId": "ATTA_GBSE_BENCHMARK_002",
+  "status": "PENDING_AFFIRMATION",
+  "createdAt": "2026-06-01",
+  "criteria": {
+    "pre_declared": true,
+    "description": "Gate conditions declared before benchmark executes"
+  },
+  "gateConditions": {
+    "avgFlagDetection": ">= 90%",
+    "silentHallucinationRateOnHallucinationTests": "<= 10%",
+    "mustNotPassFailureCount": "= 0",
+    "officialValid": true,
+    "semanticPassRate": ">= 85%"
+  }
+}

@@ -13,7 +13,7 @@ Query → [Solver] → [Hostile Auditor] → [Reconstructor] → Verified Output
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-green)](package.json)
 [![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue)](requirements.txt)
-[![CI](https://github.com/RewriteReality-Labs/gbse/actions/workflows/test.yml/badge.svg)](../../actions/workflows/test.yml)
+[![CI](https://github.com/RewriteReality-Labs/GBSE/actions/workflows/test.yml/badge.svg)](../../actions/workflows/test.yml)
 
 ---
 
