@@ -1,5 +1,5 @@
 /**
- * GBSE Test Runner — 48 structural tests, zero API calls.
+ * GBSE Test Runner — 56 structural tests, zero API calls.
  *
  * NOTE: These tests validate prompt integrity, suite completeness, and
  * environment configuration. They do NOT call the Anthropic API.
@@ -19,7 +19,7 @@ const auditorPrompt = readFileSync(join(__dirname, "../prompts/v1/auditor.txt"),
 const reconstructorPrompt = readFileSync(join(__dirname, "../prompts/v1/reconstructor.txt"), "utf8");
 
 describe("GBSE Suite Structure", () => {
-  test("Suite contains exactly 48 tests", () => { expect(TEST_SUITE.length).toBe(48); });
+  test("Suite contains exactly 56 tests", () => { expect(TEST_SUITE.length).toBe(56); });
   test("All tests have required fields", () => {
     for (const t of TEST_SUITE) {
       expect(t).toHaveProperty("id");
@@ -45,8 +45,8 @@ describe("GBSE Suite Structure", () => {
     const cats = new Set(TEST_SUITE.map((t) => t.category));
     for (const c of ["A","B","C","D","E","F"]) expect(cats).toContain(c);
   });
-  test("Total test count constant matches suite length", () => { expect(TOTAL_TESTS).toBe(48); });
-  test("Each category has at least 6 tests", () => {
+  test("Total test count constant matches suite length", () => { expect(TOTAL_TESTS).toBe(56); });
+  test("Each category has at least 8 tests", () => {
     const counts = {};
     for (const t of TEST_SUITE) counts[t.category] = (counts[t.category]||0)+1;
     for (const count of Object.values(counts)) expect(count).toBeGreaterThanOrEqual(6);
