@@ -11,3 +11,6 @@ coverage/
 _*.mjs
 _*.cjs
 _*.js
+
+benchmark-results.json
+benchmark-results.local.json
