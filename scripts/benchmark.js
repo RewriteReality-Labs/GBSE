@@ -112,14 +112,12 @@ async function runBenchmark() {
   let debatableCount = 0;
   let passCount = 0;
   let totalFindings = 0;
-
-  for (const [i, test] of TEST_SUITE.entries()) {
+  const CONCURRENCY = parseInt(process.env.GBSE_CONCURRENCY || '3', 10);
+  const runTest = async (test, i) => {
     process.stdout.write(`[${String(i + 1).padStart(2, "0")}/${TEST_SUITE.length}] ${test.id} — ${test.category} · ${test.domain}… `);
-
     try {
       const result = await runPipeline(test.query, { maxIterations: 3 });
 
-      // Check: did each expected flag appear somewhere in the pipeline output?
       const auditOutput = result.raw.auditor + result.raw.reconstructor;
       const flagsDetected = test.expectedFlags.filter((flag) =>
         auditOutput.includes(`[${flag}]`)
@@ -128,13 +126,11 @@ async function runBenchmark() {
       const flagsExpected = test.expectedFlags.length;
       const flagScore = flagsCaught / flagsExpected;
 
-      // Silent hallucination: a test with expectedFlags=[HALLUCINATION] where none was caught
       const silentHallucination =
         test.expectedFlags.includes("HALLUCINATION") &&
         !auditOutput.includes("[HALLUCINATION]");
       if (silentHallucination) silentHallucinationCount++;
 
-      // Debatable count: how many [DEBATABLE] labels appeared in final output
       const debatableInOutput = (result.finalVerdict.match(/\[DEBATABLE\]/g) || []).length;
       debatableCount += debatableInOutput;
 
@@ -171,9 +167,15 @@ async function runBenchmark() {
       console.log("ERROR:", err.message);
       results.push({ id: test.id, error: err.message });
     }
+  };
 
-    // Rate limit courtesy pause
-    await new Promise((r) => setTimeout(r, 500));
+  // Run in concurrent batches
+  for (let i = 0; i < TEST_SUITE.length; i += CONCURRENCY) {
+    const batch = TEST_SUITE.slice(i, i + CONCURRENCY);
+    await Promise.all(batch.map((test, j) => runTest(test, i + j)));
+    if (i + CONCURRENCY < TEST_SUITE.length) {
+      await new Promise((r) => setTimeout(r, 500));
+    }
   }
   results.forEach(r => { r.run = currentRun; });
   allRunResults.push(...results);
