@@ -1,5 +1,7 @@
 import "dotenv/config";
+
 import Anthropic from "@anthropic-ai/sdk";
+
 import { runSolver } from "./solver.js";
 import { runAuditor } from "./auditor.js";
 import { runReconstructor } from "./reconstructor.js";
@@ -7,6 +9,7 @@ import { runReconstructor } from "./reconstructor.js";
 // Ceiling is hard-capped at 10 — values above 10 are silently clamped.
 const MAX_ITERATIONS = Math.min(parseInt(process.env.GBSE_MAX_ITERATIONS || "3", 10), 10);
 const LOG_LEVEL = process.env.GBSE_LOG_LEVEL || "normal";
+
 // Wall-clock timeout per pipeline run (ms). 0 = disabled. Default: 120 000 ms.
 const TIMEOUT_MS = parseInt(process.env.GBSE_TIMEOUT_MS || "120000", 10);
 
@@ -36,7 +39,7 @@ export async function runPipeline(query, options = {}) {
   if (timeoutMs > 0) {
     timeoutId = setTimeout(() => {
       controller.abort();
-      log("normal", `\n  → [TIMEOUT] Pipeline exceeded ${timeoutMs} ms — aborting.\n`);
+      log("normal", `\n → [TIMEOUT] Pipeline exceeded ${timeoutMs} ms — aborting.\n`);
     }, timeoutMs);
   }
 
@@ -44,14 +47,17 @@ export async function runPipeline(query, options = {}) {
   let solverResult = null;
   let auditResult = null;
   let passed = false;
-  let previousFlags = null; // for stagnation detection
+  let hardBlocked = false;          // Change 2a: track HARD BLOCK as distinct terminal state
+  let previousFlags = null;         // for stagnation detection
 
   log("normal", "\n─── GBSE PIPELINE START ───────────────────────────────────");
   log("normal", `Query: ${query}\n`);
 
   // ── Solver → Auditor loop ─────────────────────────────────────────────────
+
   while (iterations < maxIter) {
     if (controller.signal.aborted) break;
+
     iterations++;
     log("normal", `[ITERATION ${iterations}/${maxIter}]`);
 
@@ -69,13 +75,32 @@ export async function runPipeline(query, options = {}) {
     auditResult = await runAuditor(client, solverResult.raw);
     log("verbose", "\nAUDITOR OUTPUT:\n", auditResult.raw);
 
-    passed = auditResult.passed;
+    // Change 2a: extract all three v3.2 terminal verdict states.
+    // auditResult.partialPass and auditResult.hardBlock are exposed by the
+    // v3.2-compatible parser landed in fix/auditor-v32-parser-compat.
+    // For v1 prompts both fields are undefined → coerce to false safely.
+    const auditPassed      = auditResult.passed      === true;
+    const auditPartialPass = auditResult.partialPass  === true;
+    const auditHardBlock   = auditResult.hardBlock    === true;
+
+    // Change 2a: PASS and PARTIAL_PASS are both acceptable terminal successes.
+    // HARD BLOCK is a terminal failure — loop exits but passed stays false.
+    passed      = auditPassed || auditPartialPass;
+    hardBlocked = auditHardBlock;
+
+    // Change 2a: verdict label covers all four v3.2 states.
+    const verdictLabel = auditPassed      ? "✓ [PASS]"
+                       : auditPartialPass ? "~ [PARTIAL_PASS]"
+                       : auditHardBlock   ? "✗ [HARD BLOCK]"
+                       :                   "✗ [FAIL]";
+
     log(
       "normal",
-      `  → Audit verdict: ${passed ? "✓ [PASS]" : "✗ [FAIL]"} — ${auditResult.findings.length} finding(s)\n`
+      `  → Audit verdict: ${verdictLabel} — ${auditResult.findings.length} finding(s)\n`
     );
 
-    if (passed) break;
+    // Change 2a: exit on PASS, PARTIAL_PASS, or HARD BLOCK — all are terminal.
+    if (passed || hardBlocked) break;
 
     // ── Stagnation detection ──────────────────────────────────────────────
     // If this iteration produced the exact same flag set as the previous one,
@@ -106,6 +131,13 @@ export async function runPipeline(query, options = {}) {
   log("normal", finalResult.raw);
   log("normal", "────────────────────────────────────────────────────────────\n");
 
+  // Change 2a: auditVerdict preserves the distinction between all four terminal
+  // states in diagnostics. diagnostics.passed reflects benchmark-acceptable
+  // success (PASS or PARTIAL_PASS). HARD_BLOCK is terminal but not a pass.
+  const auditPassed      = auditResult.passed      === true;
+  const auditPartialPass = auditResult.partialPass  === true;
+  const auditHardBlock   = auditResult.hardBlock    === true;
+
   return {
     query,
     finalVerdict: finalResult.finalVerdict,
@@ -113,12 +145,16 @@ export async function runPipeline(query, options = {}) {
     diagnostics: {
       iterations,
       passed,
+      auditVerdict: auditPassed      ? "PASS"
+                  : auditPartialPass ? "PARTIAL_PASS"
+                  : auditHardBlock   ? "HARD_BLOCK"
+                  :                   "FAIL",
       findingsCount: auditResult.findings.length,
       model: process.env.GBSE_MODEL || "claude-sonnet-4-20250514",
     },
     raw: {
-      solver: solverResult.raw,
-      auditor: auditResult.raw,
+      solver:        solverResult.raw,
+      auditor:       auditResult.raw,
       reconstructor: finalResult.raw,
     },
   };
