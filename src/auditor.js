@@ -24,7 +24,7 @@ export const FLAGS = {
  *
  * @param {Anthropic} client - Anthropic SDK instance
  * @param {string} solverAnswer - The Solver's raw output
- * @returns {Promise<{passed: boolean, findings: Array, reasoning: string, raw: string}>}
+ * @returns {Promise<{passed: boolean, partialPass: boolean, hardBlock: boolean, findings: Array, reasoning: string, raw: string}>}
  */
 export async function runAuditor(client, solverAnswer) {
   const maxTokens = parseInt(process.env.GBSE_MAX_TOKENS_AUDITOR || "2048", 10);
@@ -43,23 +43,73 @@ export async function runAuditor(client, solverAnswer) {
 
   const raw = message.content[0].text;
 
-  // Parse verdict
-  const passed = raw.includes("VERDICT: [PASS]");
+  // ── Verdict parsing ───────────────────────────────────────────────────────
+  //
+  // v1 format:  VERDICT: [PASS] or VERDICT: [FAIL]
+  // v3.2 format adds: VERDICT: [PARTIAL_PASS] and VERDICT: [HARD BLOCK]
+  //
+  // ^\s* tolerates harmless leading whitespace the model may emit before
+  // the header — without it, two spaces before VERDICT: silently breaks parsing.
+  //
+  // Line-anchored (^, multiline flag) prevents false positives from VERDICT
+  // tokens appearing anywhere in reasoning body text.
+  //
+  // Backward compatible: v1 prompts only emit [PASS]/[FAIL], both still match.
 
-  // Parse findings
-  const findingsMatch = raw.match(/AUDIT_FINDINGS:\s*([\s\S]*?)(?=VERDICT:|$)/);
-  const findingsRaw = findingsMatch ? findingsMatch[1].trim() : "";
+  const verdictLineMatch = raw.match(/^\s*VERDICT:\s*\[([^\]]+)\]/m);
+  const verdictToken = verdictLineMatch ? verdictLineMatch[1] : "";
+
+  const passed      = verdictToken === "PASS";
+  const partialPass = verdictToken === "PARTIAL_PASS";
+  const hardBlock   = verdictToken === "HARD BLOCK";
+
+  // ── Findings parsing ──────────────────────────────────────────────────────
+  //
+  // v1 format:  AUDIT_FINDINGS: (underscore, VERDICT comes after findings)
+  // v3.2 format: AUDIT FINDINGS: (space, VERDICT comes before — verdict-first mandate)
+  //
+  // Strategy: try v3.2 pattern first (space header, terminate at REASONING:
+  // or end of input). Fall back to v1 pattern (underscore, terminate at VERDICT:).
+  //
+  // ^\s* on both the section header and the lookahead terminator tolerates
+  // leading whitespace without changing match semantics.
+  //
+  // (?![\s\S]) is the correct JS idiom for end-of-input (\Z is not valid in JS).
+
+  let findingsRaw = "";
+
+  const findingsV32 = raw.match(/^\s*AUDIT FINDINGS:\s*([\s\S]*?)(?=^\s*REASONING:|(?![\s\S]))/m);
+  if (findingsV32) {
+    findingsRaw = findingsV32[1].trim();
+  } else {
+    const findingsV1 = raw.match(/AUDIT_FINDINGS:\s*([\s\S]*?)(?=VERDICT:|$)/);
+    if (findingsV1) {
+      findingsRaw = findingsV1[1].trim();
+    }
+  }
+
   const findings = parseFinding(findingsRaw);
 
-  // Parse reasoning
-  const reasoningMatch = raw.match(/REASONING:\s*([\s\S]*?)$/);
+  // ── Reasoning parsing ─────────────────────────────────────────────────────
+  //
+  // ^\s* tolerates leading whitespace before REASONING: header.
+  // Greedy ([\s\S]*) captures the full block to end of string.
+  // Non-greedy + multiline $ would stop at the first line break.
+
+  const reasoningMatch = raw.match(/^\s*REASONING:\s*([\s\S]*)/m);
   const reasoning = reasoningMatch ? reasoningMatch[1].trim() : "";
 
-  return { passed, findings, reasoning, raw };
+  return { passed, partialPass, hardBlock, findings, reasoning, raw };
 }
 
 /**
  * Parse the Auditor's findings block into structured objects.
+ *
+ * Recognizes the four audit tags used by both v1 and v3.2 prompts:
+ * HALLUCINATION, FLUFF, GAP, UNVERIFIED.
+ *
+ * Note: [DEBATABLE] is a Reconstructor output label, not an Auditor finding
+ * tag — it does not appear in AUDIT FINDINGS and is not included here.
  */
 function parseFinding(raw) {
   const lines = raw.split("\n").filter((l) => l.trim());
