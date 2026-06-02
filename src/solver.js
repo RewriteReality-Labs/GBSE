@@ -5,7 +5,7 @@ import { dirname, join } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SOLVER_PROMPT = readFileSync(
-  join(__dirname, "../prompts/v1/solver.txt"),
+  join(__dirname, "../prompts/RFC/solver_v2_2.txt"),  // rfc: candidate prompt
   "utf8"
 );
 

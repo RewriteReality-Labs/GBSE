@@ -5,7 +5,7 @@ import { dirname, join } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const RECONSTRUCTOR_PROMPT = readFileSync(
-  join(__dirname, "../prompts/v1/reconstructor.txt"),
+  join(__dirname, "../prompts/RFC/reconstructor_v3_2.txt"),  // rfc: candidate prompt
   "utf8"
 );
 
