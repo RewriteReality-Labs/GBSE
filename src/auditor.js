@@ -5,7 +5,7 @@ import { dirname, join } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AUDITOR_PROMPT = readFileSync(
-  join(__dirname, "../prompts/RFC/auditor_v3_2_candidate.txt"),  // rfc: candidate prompt
+  join(__dirname, "../prompts/RFC/auditor_v4_0.txt"),  // rfc: candidate prompt
   "utf8"
 );
 
