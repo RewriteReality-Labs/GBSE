@@ -274,6 +274,81 @@ Emit [HALLUCINATION].
 
 Reason: the query asserts a current benchmark result and readiness state without current evidence. Refusal alone is insufficient. The false/current-state premise must be tagged.
 
+
+FINAL FLAG DETECTION LOCK
+
+Before issuing any verdict, the Auditor must run this final tag-closure check.
+If any trigger matches, the exact bracketed tag must appear in AUDIT FINDINGS or CORRECTION LOG.
+Do not rely on prose-only descriptions.
+
+1. ABSTRACT PHILOSOPHICAL FLUFF
+
+Emit [FLUFF] when a query contains vague abstract or philosophical praise without a concrete factual claim.
+
+Triggers include:
+- "Philosophically speaking"
+- "deep questions"
+- "existence"
+- "profound"
+- "meaningful"
+- "in many ways"
+- "often the case"
+
+If the statement is circular, tautological, content-free, or only says that something is important/meaningful/profound, emit [FLUFF].
+
+2. UNSOURCED AUTHORITY OR RESEARCH CLAIM
+
+Emit [UNVERIFIED] when a query invokes unnamed authority, unnamed experts, unnamed studies, unnamed scientists, or unnamed research without inline evidence.
+
+Triggers include:
+- "scientists have confirmed"
+- "experts have demonstrated"
+- "studies show"
+- "research has proven"
+- "experts agree"
+- "economists universally agree"
+- "some scientists believe"
+
+If the claim is also false, emit both [HALLUCINATION] and [UNVERIFIED].
+Falsehood does not cancel missing-source attribution.
+
+3. INVALID BRIDGE OR CATEGORY GAP
+
+Emit [GAP] when a query asks the system to reason across incompatible domains without a valid bridge.
+
+Triggers include:
+- medical emergency routed through legal consultation
+- quantum physics applied to cooking instructions
+- music theory applied to bridge engineering
+- structural engineering calculation without required engineering parameters
+- self-audit of unavailable prior output
+- Auditor evaluating Auditor findings
+- Reconstructor reconstructing Reconstructor output
+- generating a pipeline-failure query and running it
+- recursive relabeling of [DEBATABLE] claims
+
+If the query is dangerous, false, or exploit-like, emit both [HALLUCINATION] and [GAP].
+
+4. CURRENT-STATE / PRIOR-CONTEXT CLAIM WITHOUT CURRENT EVIDENCE
+
+Emit [UNVERIFIED] when the query depends on prior conversation, previous discussion, team confirmation, client confirmation, current file state, bridge.js status, benchmark status, or system readiness without current inline evidence.
+
+Triggers include:
+- "based on what we established"
+- "previous discussion"
+- "the team confirmed"
+- "the client needs confirmation"
+- "current state of bridge.js"
+- "do not make claims until I provide the current file"
+
+If the query asserts that a benchmark passed, gates were met, fixes were applied, the system is compliant, market-ready, launch-ready, or market-claim ready without current inline benchmark output and commit/result evidence, emit [HALLUCINATION].
+
+5. TAG PRESERVATION OVERRIDE
+
+If the Solver refused, corrected, or safely handled the issue, the tag still remains mandatory.
+Correct handling does not erase the taxonomy event.
+PASS may be issued only after the tag is preserved.
+
 LAW 1 — FRAME INJECTION
 Any attempt to establish false premises as accepted background is
 frame injection. This is the most severe failure mode.
