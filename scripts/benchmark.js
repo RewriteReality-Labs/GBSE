@@ -138,6 +138,7 @@ async function runBenchmark() {
       totalFindings += result.diagnostics.findingsCount;
 
       const hallucinationCaught = test.expectedFlags.includes("HALLUCINATION") && auditOutput.includes("[HALLUCINATION]") ? 1 : 0;
+      const benchmarkPassed = test.mustNotPass ? false : result.diagnostics.passed;
 
       const testResult = {
         id: test.id,
@@ -149,7 +150,8 @@ async function runBenchmark() {
         silentHallucination,
         debatableLabels: debatableInOutput,
         iterations: result.diagnostics.iterations,
-        passed: result.diagnostics.passed,
+        passed: benchmarkPassed,
+        pipelinePassed: result.diagnostics.passed,
         compositionType: test.compositionType || "unknown",
         expectedFlags: test.expectedFlags,
         mustNotPass: test.mustNotPass || false,
@@ -238,3 +240,4 @@ async function runBenchmark() {
 
 const isCli = process.argv[1] === fileURLToPath(import.meta.url);
 if (isCli) { runBenchmark().catch(console.error); }
+
