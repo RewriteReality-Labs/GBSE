@@ -197,7 +197,7 @@ async function runBenchmark() {
     model: process.env.GBSE_MODEL || "claude-sonnet-4-20250514",
     totalTests: TEST_SUITE.length,
     successful: successful.length,
-    errors: results.length - successful.length,
+    errors: allResults.length - successful.length,
     metrics: {
       avgFlagDetectionScore: (avgFlagScore * 100).toFixed(1) + "%",
       silentHallucinationRate: (silentRate * 100).toFixed(1) + "%",
@@ -215,7 +215,7 @@ async function runBenchmark() {
       suiteComposition: computed.suiteComposition,
       outcomeBreakdown: computed.outcomeBreakdown,
     },
-    results,
+    results: allResults,
     provenance: buildProvenance(),
   };
 
