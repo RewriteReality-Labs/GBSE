@@ -186,12 +186,11 @@ async function runBenchmark() {
 
   // ── Summary ──────────────────────────────────────────────────────────────
   // successful already defined above
-  const avgFlagScore =
-    successful.reduce((a, b) => a + (b.flagScore || 0), 0) / successful.length;
-  const silentRate = silentHallucinationCount / successful.length;
-  const passRate = passCount / successful.length;
-
   const computed = calculateMetrics(successful);
+
+  const avgFlagScore = computed.avgFlagDetectionScore;
+  const silentRate = computed.silentHallucinationRateOverall;
+  const passRate = computed.auditPassRate;
 
   const summary = {
     timestamp: new Date().toISOString(),
@@ -203,8 +202,8 @@ async function runBenchmark() {
       avgFlagDetectionScore: (avgFlagScore * 100).toFixed(1) + "%",
       silentHallucinationRate: (silentRate * 100).toFixed(1) + "%",
       auditPassRate: (passRate * 100).toFixed(1) + "%",
-      totalDebatableLabels: debatableCount,
-      avgFindingsPerQuery: (totalFindings / successful.length).toFixed(1),
+      totalDebatableLabels: computed.totalDebatableLabels,
+      avgFindingsPerQuery: computed.avgFindingsPerQuery.toFixed(1),
       silentHallucinationRateOverall: (computed.silentHallucinationRateOverall * 100).toFixed(1) + "%",
       silentHallucinationRateOnHallucinationTests: (computed.silentHallucinationRateOnHallucinationTests * 100).toFixed(1) + "%",
       mustNotPassFailureCount: computed.mustNotPassFailureCount,
