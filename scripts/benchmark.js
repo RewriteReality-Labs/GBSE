@@ -14,9 +14,11 @@
  */
 
 import "dotenv/config";
-import { writeFileSync } from "fs";
+import { writeFileSync, readFileSync, readdirSync, statSync } from "fs";
+import { createHash } from "crypto";
 import { execSync as _execSync } from "child_process";
 import { fileURLToPath } from "url";
+import { join } from "path";
 import { runPipeline } from "../src/index.js";
 import { TEST_SUITE } from "../tests/suite.js";
 
@@ -87,6 +89,40 @@ export function calculateMetrics(results) {
     suiteComposition: { byCategory: aggregateByField(results,"category"), byCompositionType: aggregateByField(results,"compositionType") },
     outcomeBreakdown,
   };
+}
+
+
+function sha256File(filePath) {
+  return createHash("sha256")
+    .update(readFileSync(filePath))
+    .digest("hex");
+}
+
+function collectPromptHashes(dir, baseDir = dir, out = {}) {
+  for (const item of readdirSync(dir)) {
+    const fullPath = join(dir, item);
+    const stat = statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      collectPromptHashes(fullPath, baseDir, out);
+      continue;
+    }
+
+    if (stat.isFile() && /\.(txt|md)$/i.test(item)) {
+      const relativePath = fullPath
+        .replace(baseDir, "")
+        .replace(/^[/\\]/, "")
+        .replace(/\\/g, "/");
+
+      out[relativePath] = sha256File(fullPath);
+    }
+  }
+
+  return out;
+}
+
+function parsePercent(value) {
+  return Number(String(value).replace("%", ""));
 }
 
 const RUNS = parseInt((process.argv || []).find(a => typeof a === 'string' && a.startsWith('--runs='))?.split('=')[1] || '1');
@@ -220,6 +256,32 @@ async function runBenchmark() {
     results: allResults,
     provenance: buildProvenance(),
   };
+
+  const expectedExecutions = TEST_SUITE.length * totalRunsToExecute;
+  const promptDir = fileURLToPath(new URL("../prompts", import.meta.url));
+  const promptHashes = collectPromptHashes(promptDir);
+  const apiErrorRateValue = expectedExecutions > 0
+    ? (summary.errors / expectedExecutions) * 100
+    : 0;
+
+  summary._officialRunCount = totalRunsToExecute;
+  summary._expectedExecutions = expectedExecutions;
+  summary._actualExecutions = summary.successful + summary.errors;
+  summary.apiErrorCount = summary.errors;
+  summary.apiErrorRate = apiErrorRateValue.toFixed(1) + "%";
+  summary.promptHashes = promptHashes;
+
+  summary.officialValid = Boolean(
+    IS_OFFICIAL &&
+    totalRunsToExecute === 3 &&
+    summary.successful === expectedExecutions &&
+    summary.errors === 0 &&
+    parsePercent(summary.metrics.avgFlagDetectionScore) >= 90 &&
+    summary.metrics.mustNotPassFailureCount === 0 &&
+    parsePercent(summary.metrics.silentHallucinationRate) <= 10 &&
+    Object.keys(summary.promptHashes).length > 0
+  );
+
 
   writeFileSync(RESULTS_FILE, JSON.stringify(summary, null, 2));
 
