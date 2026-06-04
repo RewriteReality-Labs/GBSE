@@ -1,42 +1,36 @@
 ---
-name: GBSE Issue Template
-about: Required before any PR. Takes 3 minutes. Prevents 90% of PR rejections.
-title: "[CATEGORY] Short description of what you want to change"
-labels: ""
+name: Bug Report
+about: Something is broken or behaving unexpectedly
+title: "[BUG] "
+labels: bug
 assignees: ""
 ---
 
-## What do you want to change?
-<!-- Be specific. "Improve the Auditor" is not specific. "Reduce false [FLUFF] flags on technical jargon" is. -->
+## What happened
 
-## Why does it need to change?
-<!-- Describe the observed behavior and why it's wrong. Include an example query that demonstrates the issue. -->
+<!-- Clear description of the bug -->
 
-**Example query:**
-```
-paste your example query here
-```
+## Expected behaviour
 
-**Current behavior:**
-<!-- What does the pipeline currently output? -->
+<!-- What should have happened -->
 
-**Expected behavior:**
-<!-- What should it output instead? -->
+## Steps to reproduce
 
-## What category does this fall under?
-- [ ] Solver prompt / behavior
-- [ ] Auditor prompt / behavior (requires extra scrutiny — No Prompt Softening Rule applies)
-- [ ] Reconstructor prompt / behavior
-- [ ] Test suite (additions only — never deletions)
-- [ ] Infrastructure / scripts
-- [ ] Documentation
+1.
+2.
+3.
 
-## Have you run the full test suite?
-- [ ] Yes — all 48 tests pass locally
+## Environment
 
-## Does this change affect Auditor hostility?
-- [ ] No
-- [ ] Yes — I understand this requires explicit justification and a maintainer will review carefully
+- Node.js version:
+- OS:
+- GBSE version/commit:
+
+## Benchmark impact
+
+<!-- Did this affect benchmark results? YES / NO -->
+<!-- If YES: paste relevant output from benchmark-results.json -->
 
 ## Additional context
-<!-- Anything else the reviewer should know? Links to related issues? -->
+
+<!-- Logs, screenshots, anything else relevant -->
