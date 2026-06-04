@@ -7,8 +7,8 @@
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)
 ![Tests](https://img.shields.io/badge/tests-56%20active-informational)
-![Benchmark](https://img.shields.io/badge/benchmark-92.0%25%20local%20gate%20passed-yellow)
-![ATTA](https://img.shields.io/badge/ATTA-BENCHMARK__002%20BASELINE-orange)
+![Benchmark](https://img.shields.io/badge/benchmark-90.5%25%20flag%20detection-brightgreen)
+![ATTA](https://img.shields.io/badge/ATTA-BENCHMARK__002%20AFFIRMED-brightgreen)
 
 ---
 
@@ -32,14 +32,13 @@
 
 ## Current Proof Status
 
-| Layer | Value | Claim Allowed |
+| Layer | Value | Status |
 |---|---|---|
-| Local benchmark | 56 tests · **92.0%** flag detection · **0.0%** silent hallucination · **0** must-not-pass failures | `LOCAL PASS` |
-| Official benchmark | Pending 3-run validation (`GBSE_OFFICIAL=true`, `--runs=3`) | `NOT AFFIRMED` |
-| ATTA record | `ATTA_GBSE_BENCHMARK_002` remains `BASELINE` until `officialValid: true` is recorded in `benchmark-results.json` | No public AFFIRMED claim yet |
+| Benchmark | 168 executions · **90.5%** flag detection · **1.8%** silent hallucination · **0** must-not-pass failures | `AFFIRMED ✅` |
+| Official run | 3 runs · `officialValid: true` · 0 errors · proof commit `5f62d2c` | `AFFIRMED ✅` |
+| ATTA record | `ATTA_GBSE_BENCHMARK_002` — **AFFIRMED** · tag `v1.0.0-atta.affirmed` | `SEALED` |
 
-> **Commit on record:** `acaecc2548dd`
-> This README must not be read as AFFIRMED until `benchmark-results.json` records `officialValid: true` across three official runs.
+
 
 ---
 
@@ -116,10 +115,10 @@ CONFIDENCE:     VERIFIED | ASSUMED | DEBATABLE
 
 ---
 
-**`ATTA_GBSE_BENCHMARK_002` · Current status: `BASELINE`**
-- Local gate: passed at 92.0% flag detection, 0.0% silent hallucination, 0 must-not-pass failures
-- Official 3-run: pending
-- `officialValid`, prompt hash verification, schema guard, and API error accounting must all be confirmed in `benchmark-results.json` before AFFIRMED status is claimed
+**`ATTA_GBSE_BENCHMARK_002` · Status: `AFFIRMED` ✅**
+- 168 executions · 0 errors · 90.5% flag detection · 1.8% silent hallucination · 0 must-not-pass failures
+- Official 3-run complete · `officialValid: true` · proof commit `5f62d2c`
+- Tag: `v1.0.0-atta.affirmed`
 
 > **ATTA Rule:** No claim about GBSE's benchmark advances past its current ATTA proof status. An official AFFIRMED result always outweighs any unverified local figure.
 
@@ -282,8 +281,8 @@ _officialRunCount       = 3
 promptHashes            present in result
 ```
 
-**Current local result:** 92.0% · 0.0% · 0 — all local gates passed.
-**Official status:** `BASELINE` — three official runs required before AFFIRMED.
+**Official result:** 90.5% · 1.8% · 0 — all gates passed across 168 executions.
+**Official status:** `AFFIRMED` — `officialValid: true` · proof commit `5f62d2c` · tag `v1.0.0-atta.affirmed`.
 
 > **What ATTA prevents:** Without pre-declared gates, a benchmark number is an assertion. With ATTA, it is an auditable commitment — the exact methodology, conditions, and prompt versions are on record before the result exists. A competitor or auditor cannot dispute the number without engaging the pre-declared methodology directly.
 
@@ -291,11 +290,11 @@ promptHashes            present in result
 
 ## Roadmap
 
-> Nothing below ships before `ATTA_GBSE_BENCHMARK_002` moves to `AFFIRMED`.
+> `ATTA_GBSE_BENCHMARK_002` is **AFFIRMED**. Phase 1 complete.
 
 | Phase | Name | Timing | Unlocks |
 |---|---|---|---|
-| 1 | **PROVE** | Official 3-run | AFFIRMED status · tagged release |
+| 1 | **PROVE** | ✅ Complete | AFFIRMED status · tagged release `v1.0.0-atta.affirmed` |
 | 2 | **SIGNAL** | Week 1 post-AFFIRMED | ATTA record public · repo announcement |
 | 3 | **EARN** | Weeks 2–3 | Paid governance audit service · subscription tooling |
 | 4 | **CLOSE** | Month 2 | Whitepaper gap closed · Product Hunt launch |
