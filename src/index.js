@@ -105,7 +105,13 @@ export async function runPipeline(query, options = {}) {
     // ── Stagnation detection ──────────────────────────────────────────────
     // If this iteration produced the exact same flag set as the previous one,
     // further iterations will not improve the output — break early.
-    const currentFlags = auditResult.findings.map((f) => f.tag).sort().join(",");
+    function normalizeFindingText(text = "") {
+  return text.toLowerCase().replace(/\s+/g, " ").slice(0, 120);
+}
+const currentFlags = auditResult.findings
+  .map((f) => f.tag + ":" + normalizeFindingText(f.text || f.raw || ""))
+  .sort()
+  .join("|");
     if (previousFlags !== null && currentFlags === previousFlags) {
       log("normal", "  → [STAGNATION DETECTED] Identical flags on consecutive iterations — breaking loop early.\n");
       break;

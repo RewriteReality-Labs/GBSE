@@ -1,0 +1,11 @@
+{
+  "attaId": "ATTA_GBSE_FIX_001",
+  "status": "ACKNOWLEDGED",
+  "timestamp": "2026-05-26T17:40:58.468Z",
+  "branch": "fix/auditor-regression",
+  "commit": "d2ecaba8c120fae8aba1c72a456a66bfbf726734",
+  "failure": "ReferenceError: silentHallucinationCount is not defined",
+  "diagnosis": "Benchmark summary references stale single-run counters after multi-run refactor.",
+  "patchType": "minimal-counter-restore",
+  "promptsTouched": false
+}

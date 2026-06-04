@@ -1,0 +1,21 @@
+{
+  "attaId": "ATTA_GBSE_ROOT_002",
+  "status": "ROOT_CAUSE_PATCHED_PENDING_LIVE_AFFIRMATION",
+  "timestamp": "2026-05-26T19:00:50.605Z",
+  "branch": "fix/auditor-regression",
+  "commitBefore": "eaa224de64944485c2bdeee740a90dd3b61593c4",
+  "failureClass": "live benchmark summary route scope failure",
+  "observedFailures": [
+    "ReferenceError: silentHallucinationCount is not defined",
+    "ReferenceError: results is not defined"
+  ],
+  "rootCause": "After multi-run refactor, the execution source became allRunResults, but summary route still referenced results and old counters. Prior fixes patched symptoms, not the complete summary execution route.",
+  "fix": "Bind summary route to aggregated multi-run dataset with const results = allRunResults before summary metrics execute.",
+  "promptsTouched": false,
+  "behaviorChanged": false,
+  "validationRequired": [
+    "Load benchmark module",
+    "npm test",
+    "npm run benchmark must reach final summary and write benchmark-results.local.json"
+  ]
+}
