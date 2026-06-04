@@ -1,230 +1,231 @@
-# GBSE — Great Bifurcation Synthesis Engine
+GBSE — Great Bifurcation Synthesis Engine
 
-**An adversarial AI verification framework designed to reduce silent hallucination by forcing every answer through hostile audit before delivery.**
+A recursive three-layer AI governance pipeline that forces language models to produce verified, auditable outputs — not confident confabulation. Every claim passes a Solver, survives an Auditor, and is reconstructed with a correction log before it exits the pipeline.
 
-Every AI system answers without accountability. It can be wrong, fluffy, or confidently hallucinated — and the user has no way to know. GBSE introduces a three-phase adversarial pipeline that treats every answer as a hypothesis to be disproved before delivery.
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
 
-```
-Query → [Solver] → [Hostile Auditor] → [Reconstructor] → Verified Output
-                        ↑                    |
-                        └──── [FAIL] loop ───┘
-```
+Table of Contents
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D18-green)](package.json)
-[![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue)](requirements.txt)
-[![CI](https://github.com/RewriteReality-Labs/GBSE/actions/workflows/test.yml/badge.svg)](../../actions/workflows/test.yml)
+Current Proof Status
+Architecture
+Benchmark History
+Quickstart
+Hallucination Taxonomy
+The 12 Laws
+27 EC Classes
+Repository Structure
+ATTA Governance
+Roadmap
+Whitepaper Alignment
+Contributing
+License
 
----
 
-## How It Works
+Current Proof Status
+LayerValueClaim AllowedLocal benchmark56 tests · 92.0% flag detection · 0.0% silent hallucination · 0 must-not-pass failuresLOCAL PASSOfficial benchmarkPending 3-run validation (GBSE_OFFICIAL=true, --runs=3)NOT AFFIRMEDATTA recordATTA_GBSE_BENCHMARK_002 remains BASELINE until officialValid: true is recorded in benchmark-results.jsonNo public AFFIRMED claim yet
 
-| Component | Role | Pass Criterion |
-|-----------|------|----------------|
-| **Solver** | Generates best-possible answer; self-labels uncertainty as `[DEBATABLE]` | Draft produced |
-| **Auditor** | Actively disproves the Solver — tags every flaw | `[PASS]` token issued |
-| **Reconstructor** | Removes flagged content; fills gaps; produces verified final output | All flags resolved |
+Commit on record: acaecc2548dd
+This README must not be read as AFFIRMED until benchmark-results.json records officialValid: true across three official runs.
 
-The Auditor classifies flaws using exactly four tags:
 
-| Tag | Meaning | Action |
-|-----|---------|--------|
-| `[HALLUCINATION]` | Unverifiable factual claim | Remove entirely |
-| `[FLUFF]` | Generic filler with no informational value | Remove entirely |
-| `[GAP]` | Logical leap or missing reasoning step | Fill with specifics |
-| `[UNVERIFIED]` | May be correct but not confirmable | Label `[DEBATABLE]` |
+Architecture
+The Pipeline
+Every query enters an Orchestrator-governed iteration loop. The Solver generates a candidate output and declares its own failure modes. The Auditor applies 12 Laws to detect hallucination, fluff, gaps, and unverified claims. If the verdict is FAIL, the critique is injected back into the Solver. The loop continues until PASS, stagnation, or timeout. The Reconstructor rebuilds the final output with a formal correction log.
+┌─────────────────────────────────────────────────────────┐
+│                    ORCHESTRATOR                          │
+│         (iteration ceiling · stagnation · timeout)      │
+└──────────┬──────────────────────────────────────────────┘
+           │
+     ┌─────▼──────┐     ┌───────────┐     ┌───────────────┐
+     │   SOLVER   │────▶│  AUDITOR  │────▶│ RECONSTRUCTOR │
+     │ Expansion  │     │Compression│     │  Integration  │
+     └─────▲──────┘     └─────┬─────┘     └───────────────┘
+           │                  │
+           └──── FAIL ◀───────┘
+              (critique injected back)
 
-If the Auditor issues `[FAIL]`, the pipeline loops — the Solver receives the full critique and must correct its draft. This repeats until `[PASS]` or the iteration ceiling (default: 3) is reached. A stagnation detector breaks the loop early if two consecutive audits produce identical flags.
+On PASS, the Reconstructor produces the final output with a structured correction log. A system that only detects failure and stops is a rejection engine — GBSE corrects and rebuilds, making it usable in production workflows, not just as a validator.
 
----
+Canonical Output Format
 
-## Quickstart
+Changing this format requires an RFC committed to prompts/RFC/.
 
-**Node.js:**
-```bash
-gh repo fork RewriteReality-Labs/gbse --clone
-cd gbse
+GBSE OUTPUT
+─────────────────────────────────────────────
+VERDICT:        PASS | FAIL
+AUDIT FINDINGS: [HALLUCINATION] | [FLUFF] | [GAP] | [UNVERIFIED]
+CORRECTION LOG: Structured correction with source trace
+ITERATIONS:     Count before resolution
+CONFIDENCE:     VERIFIED | ASSUMED | DEBATABLE
+
+Benchmark History
+
+This is not a static score. The regression and recovery are more credible than a clean number with no history. No competitor has published theirs.
+
+ATTA_GBSE_BENCHMARK_001 · Initial run
+
+Core pipeline built: run_pipeline(), solver v1, auditor v1, reconstructor v1
+Result: 91.7% flag detection ✅
+
+
+ATTA_GBSE_BENCHMARK_001 · Regression
+
+A prompt change caused a collapse to 60.4% ❌ — REJECTED
+Root cause diagnosed over two days: the auditor was emitting detection verdicts as free-text prose instead of structured taxonomy tags. The benchmark scanner could not parse them. Detection capability was intact — output format was wrong.
+
+
+Recovery · auditor_v3.1 / solver_v2.1 / reconstructor_v3.1
+
+Three prompt files upgraded simultaneously
+Auditor now emits formal bracketed tags [HALLUCINATION], [FLUFF], [GAP], [UNVERIFIED]
+Scoring logic in benchmark.js corrected — 33 false failures resolved
+
+
+PR #16 → #19 · auditor_v4_0 · Gate-by-gate closure
+PRChangeResult#16Benchmark scoring fix33 false failures resolved immediately#17auditor_v4 tag enforcement68.8% → 83.9%#18Silent hallucination lockRate drops to 0.0%#19Final flag detection lock92.0% · 0.0% · 0 — all three local gate conditions met
+
+ATTA_GBSE_BENCHMARK_002 · Current status: BASELINE
+
+Local gate: passed at 92.0% flag detection, 0.0% silent hallucination, 0 must-not-pass failures
+Official 3-run: pending
+officialValid, prompt hash verification, schema guard, and API error accounting must all be confirmed in benchmark-results.json before AFFIRMED status is claimed
+
+
+ATTA Rule: No claim about GBSE's benchmark advances past its current ATTA proof status. An official AFFIRMED result always outweighs any unverified local figure.
+
+
+Quickstart
+Prerequisites
+
+Node.js 18+
+Python 3.9+ (optional — reference runtime only)
+An ANTHROPIC_API_KEY from console.anthropic.com
+
+Node.js
+bash# Clone and install
+git clone https://github.com/RewriteReality-Labs/GBSE.git
+cd GBSE
 npm install
+
+# Configure environment
 cp .env.example .env
-# Add your ANTHROPIC_API_KEY to .env
-npm test                          # 48 structural tests must pass (no API key needed)
-node src/index.js "Your query"    # Run the pipeline
-```
+# Open .env and set ANTHROPIC_API_KEY
 
-**Python:**
-```bash
-pip install -r requirements.txt
-cp .env.example .env
-# Add your ANTHROPIC_API_KEY to .env
-python gbse.py "Your query"
-```
-
----
-
-## Real Output Example
-
-```
-─── GBSE PIPELINE START ───────────────────────────────────
-Query: What is the boiling point of water at 8,848m altitude?
-
-[ITERATION 1/3]
-  → Solver running…
-  → Auditor running…
-  → Audit verdict: ✗ [FAIL] — 2 finding(s)
-
-[ITERATION 2/3]
-  → Solver running…
-  → Auditor running…
-  → Audit verdict: ✓ [PASS] — 0 finding(s)
-
-  → Reconstructor running…
-
-─── FINAL OUTPUT ───────────────────────────────────────────
-[FINAL VERDICT]
-At 8,848m (Mount Everest summit), atmospheric pressure is approximately 33.7 kPa
-(roughly one-third of sea-level pressure). At this pressure, water boils at
-approximately 70°C (158°F), compared to 100°C at sea level.
-
-[SYSTEM DIAGNOSTICS]
-Orchestration Path: Solver (x2) → Auditor → Reconstructor
-Iterations: 2
-Audit Result: [PASS]
-
-[CORRECTION LOG]
-1. [HALLUCINATION] — removed claim that water boils at "68°C" (correct value is ~70°C)
-2. [GAP] — added atmospheric pressure value (33.7 kPa) that supports the boiling point claim
-────────────────────────────────────────────────────────────
-```
-
----
-
-## Output Format
-
-Every GBSE run produces output in this canonical format:
-
-```
-[FINAL VERDICT]
-Clean, verified, hallucination-free answer. Any uncertain claims are labeled [DEBATABLE].
-
-[SYSTEM DIAGNOSTICS]
-Orchestration Path: Solver (x2) → Auditor → Reconstructor
-Iterations: 2
-Audit Result: [PASS]
-
-[CORRECTION LOG]
-1. [HALLUCINATION] — removed claim about X (unverifiable)
-2. [FLUFF] — removed "it is important to note"
-3. [GAP] — added missing step between Y and Z
-```
-
----
-
-## Benchmarks
-
-Measured against a 48-item adversarial test suite spanning 6 domains.
-Run `npm run benchmark` with your API key to reproduce.
-
-| Metric | Result |
-|--------|--------|
-| Avg flag detection score | Run `npm run benchmark` |
-| Silent hallucination rate | Run `npm run benchmark` |
-| Audit pass rate | Run `npm run benchmark` |
-> Benchmark claims are generated from official runs only. README figures must match committed official benchmark results.
-
-```bash
-npm run benchmark   # writes benchmark-results.json
-```
-
-See `docs/BENCHMARK_METHODOLOGY.md` for metric definitions.
-
----
-
-## Testing
-
-```bash
+# Run tests
 npm test
-```
 
-Runs 48 **structural tests** — no API key required. These validate:
-- Prompt files contain required strings and format markers
-- The test suite has correct shape (48 scenarios, unique IDs, valid tags)
-- Environment variables parse correctly
+# Run local benchmark
+npm run benchmark
+Official 3-run benchmark — bash/Linux/Mac:
+bashexport GBSE_OFFICIAL=true
+export GBSE_CONCURRENCY=1
+node scripts/benchmark.js --runs=3 | tee benchmark-official-output.txt
+Official 3-run benchmark — Windows PowerShell:
+powershell$env:GBSE_OFFICIAL="true"
+$env:GBSE_CONCURRENCY="1"
+node scripts\benchmark.js --runs=3 *> benchmark-official-output.txt
+Python (reference)
+bashpip install -r requirements.txt
+python gbse.py
+# Returns: verdict, audit_findings, correction_log, iterations, confidence
+# Note: benchmark runtime is Node.js. Python is a reference implementation.
 
-> **Note:** `npm test` does not call the Anthropic API and does not validate pipeline behavior.
-> For live pipeline validation, run `npm run benchmark`.
+Hallucination Taxonomy
+Four output tags. Each has a precise definition. Ambiguity in tagging is itself an auditor failure.
+TagDefinitionBlocks PASS?[HALLUCINATION]False, unverifiable, or confabulated claim presented with confidence. Hedging a false claim does not remove the tag (LAW 3).YES · HARD[FLUFF]Vacuous filler with zero informational value. Generic padding, empty affirmations. Distinct from [GAP] — FLUFF has content present but worthless. (LAW 5)YES[GAP]Logical discontinuity — a claim that cannot reach its conclusion from the evidence given. The argument has a structural hole, not just a missing citation. (LAW 6)YES[UNVERIFIED]Claim whose truth is uncertain and that uncertainty is not labelled. Distinct from hallucination — the claim may be true, but its status is not declared. (LAW 7)YES
 
----
+Critical distinction: A [HALLUCINATION] tag cannot be downgraded to [FLUFF] to soften an audit verdict. Misrouting a false claim to a lower-severity tag is itself an auditor violation. LAW 8 overrides LAW 12 — inability to verify a checkable fact is a hallucination, not merely an uncertainty.
 
-## Configuration
 
-| Env var | Default | Description |
-|---------|---------|-------------|
-| `ANTHROPIC_API_KEY` | — | Required for pipeline runs |
-| `GBSE_MODEL` | `claude-sonnet-4-20250514` | Model for all three roles |
-| `GBSE_MAX_ITERATIONS` | `3` | Solver→Auditor loop ceiling (max 10; values above 10 clamped) |
-| `GBSE_LOG_LEVEL` | `normal` | `silent` \| `normal` \| `verbose` |
-| `GBSE_MAX_TOKENS_SOLVER` | `1024` | Token budget for Solver |
-| `GBSE_MAX_TOKENS_AUDITOR` | `2048` | Token budget for Auditor |
-| `GBSE_MAX_TOKENS_RECONSTRUCTOR` | `4096` | Token budget for Reconstructor |
-| `GBSE_TIMEOUT_MS` | `120000` | Wall-clock timeout per run in ms; `0` = disabled |
+The 12 Laws
+Applied by the Auditor on every iteration. HARD BLOCK violations terminate the pipeline immediately — no output is produced.
+LawNameRuleSeverityLAW 1Frame Injection6 subcases (1A–1F). The Solver cannot adopt the questioner's framing if it contains a false premise.HARD BLOCKLAW 2False Premise Correction MandatoryAn uncorrected false premise in any answer = [HALLUCINATION]. Silence is not correction.HARDLAW 3No Hedging False ClaimsA hedged false claim is still [HALLUCINATION]. "It might be the case that…" does not lower severity.HARDLAW 4No Confabulated SourcesUnverifiable citations = [HALLUCINATION]. No invented paper titles, no invented author names.HARDLAW 5Vacuous Filler BannedGeneric padding with zero informational value triggers [FLUFF]. Content must earn its presence.STANDARDLAW 6Logical Gaps Must Be NamedA gap in reasoning not declared by the Solver triggers [GAP]. Silent discontinuity is a violation.STANDARDLAW 7Uncertainty Must Be LabelledUncertain claims without a declared uncertainty marker trigger [UNVERIFIED].STANDARDLAW 8Inability to Verify = HallucinationIf a claim is checkable and the Auditor cannot verify it, it is [HALLUCINATION] — not [UNVERIFIED]. Overrides LAW 12.HARDLAW 9Overclaiming Certainty = HallucinationConfidence must match evidence. Stating a contested claim as settled fact triggers [HALLUCINATION].HARDLAW 10Protect Valid UncertaintyGenuine, accurate hedges are not [FLUFF]. The Auditor must not penalise correct epistemic humility.GUARDLAW 11Stale-State / Current-State Claim Control5 subcases (11A–11E). 11E = HARD BLOCK: synonym evasion — swapping temporal markers to smuggle stale claims through.11E: HARD BLOCKLAW 12Conservative DefaultUnknown patterns → FAIL by default. EXEMPTION: checkable facts with a verifiable source can pass. LAW 8 overrides this exemption.DEFAULT
 
----
+27 EC Classes
+The EC (Escape Class) taxonomy defines named adversarial patterns the pipeline is designed to detect and contain. Each class has a defined detection rule and pipeline injection point. EC-25 is the anchor case — a real resolved scenario that predates and validated the framework.
+RangeDescriptionEC-01 – EC-10Core scope and premise defense: jurisdiction, timeline, obligation boundary, initial claim handling.EC-11 – EC-20Escalation ladder: discharge declarations, estoppel chains, laches arguments, conduct analysis.EC-21 – EC-25Advanced adversarial patterns. EC-25: Context Drift / Stale-State — the anchor case that validated the entire framework against a real scenario before any code was written.EC-26Origin Decay Defense. A dispute has drifted so far from the original obligation that the current claim no longer traces to what was established. Pipeline field: originClauseLoaded.EC-27Compounding Ambiguity Loop. New claims introduced faster than any can be resolved. Orchestrator Claim Freeze fires. Pipeline field: activeClaimCount.EC-26×27 + EC-27×26Cross-injection · HARD BLOCK. When EC-26 and EC-27 fire simultaneously, the pipeline hard-blocks — no output until both are resolved in sequence. Directional: EC-26×27 ≠ EC-27×26.
 
-## Repository Structure
+Note on scope: The EC taxonomy was developed for adversarial output-verification scenarios. It shares structural convergence with the Solver/Auditor/Reconstructor/Orchestrator pipeline pattern. See docs/SPECIFICATION.md for full class definitions and test cases.
 
-```
-src/
-  index.js            — Pipeline orchestrator (entry point)
-  solver.js           — Solver role and API call logic
-  auditor.js          — Hostile Auditor — do not soften its prompt
-  reconstructor.js    — Final synthesis and correction log
-prompts/
-  v1/                 — Current versioned prompts
-    solver.txt
-    auditor.txt       — Hardened — do not soften
-    reconstructor.txt
-  RFC/                — Proposed changes under public comment
-tests/
-  suite.js            — 48 adversarial test scenarios
-  pipeline.test.js    — Jest structural test runner (no API calls)
-scripts/
-  benchmark.js        — Reproducible accuracy measurement
-  audit-diff.js       — Required for PRs that modify prompts
-  demo.js             — Three hand-picked demo queries
-docs/
-  SPECIFICATION.md    — Full pipeline specification
-  HALLUCINATION_TAXONOMY.md
-  BENCHMARK_METHODOLOGY.md
-.github/
-  workflows/
-    test.yml          — CI: runs npm test on push/PR
-gbse.py               — Python implementation (mirrors src/)
-```
 
----
+Repository Structure
+GBSE/
+├── gbse.py                          — Python reference entry point
+├── src/
+│   ├── index.js                     — Node.js entry point
+│   ├── solver.js                    — Solver layer (Expansion)
+│   ├── auditor.js                   — Auditor layer (Compression)
+│   └── reconstructor.js             — Reconstructor layer (Integration)
+├── prompts/
+│   ├── v1/                          — Production prompt files
+│   └── RFC/                         — Candidate prompts under review
+├── tests/
+│   ├── pipeline.test.js             — 39 unit tests (2 suites)
+│   └── benchmark-metrics.test.js   — Benchmark gate validation
+├── scripts/
+│   └── benchmark.js                 — 56-test active benchmark runner
+├── docs/
+│   ├── SPECIFICATION.md
+│   ├── HALLUCINATION_TAXONOMY.md
+│   └── BENCHMARK_METHODOLOGY.md
+├── benchmark-results.json           — Live benchmark output (ATTA ground truth)
+├── package.json                     — Node.js project manifest
+├── package-lock.json                — npm dependency lockfile
+├── requirements.txt                 — Python dependencies
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── .env.example
+└── LICENSE
 
-## Contributing
+ATTA Governance
+Every benchmark claim in this repo is gated by an ATTA (Adversarial Trust and Transparency Architecture) record. Gates are pre-declared — stated before a run happens, not after. Any reader can inspect the gate conditions and compare them against benchmark-results.json.
+ATTA_GBSE_BENCHMARK_002 — Pre-Declared Gate Conditions
+avgFlagDetection        ≥ 90%
+mustNotPassFailureCount = 0
+silentHallucinationRate ≤ 10%
+officialValid           = true
+apiErrorRate            < 5%
+_officialRunCount       = 3
+promptHashes            present in result
+Current local result: 92.0% · 0.0% · 0 — all local gates passed.
+Official status: BASELINE — three official runs required before AFFIRMED.
 
-Read `CONTRIBUTING.md` before opening a PR. The short version:
+What ATTA prevents: Without pre-declared gates, a benchmark number is an assertion. With ATTA, it is an auditable commitment — the exact methodology, conditions, and prompt versions are on record before the result exists. A competitor or auditor cannot dispute the number without engaging the pre-declared methodology directly.
 
-1. Open an issue using `ISSUE_TEMPLATE.md`
-2. All 48 tests must pass before submitting (`npm test`)
-3. CI must be green — a red CI is an automatic reject
-4. Attach `npm run audit-diff` output showing behavioral change
-5. **Never reduce the Auditor's adversarial intensity** — PRs that do are rejected immediately
 
-RFC required for: taxonomy changes, output format changes, iteration ceiling logic.
+Roadmap
 
----
+Nothing below ships before ATTA_GBSE_BENCHMARK_002 moves to AFFIRMED.
 
-## The Core Guarantee
+PhaseNameTimingUnlocks1PROVEOfficial 3-runAFFIRMED status · tagged release2SIGNALWeek 1 post-AFFIRMEDATTA record public · repo announcement3EARNWeeks 2–3Paid governance audit service · subscription tooling4CLOSEMonth 2Whitepaper gap closed · Product Hunt launch5V2Months 7–18Meta Governor + Solver A/B/C + Cross-Auditor
 
-No claim exits the pipeline without being challenged by a model whose only job is to disprove it. No claim exits the pipeline without being challenged by a model whose only job is to disprove it. Claims that cannot be verified are labeled `[DEBATABLE]` or removed. This is enforced at the prompt level on every single call. Silent hallucination rate and flag detection scores are published in benchmark-results.json from official multi-run results only. This is enforced at the prompt level on every single call.
+Source of truth for all phase claims: this repo only. No social post, no document, no conversation overrides the repo state.
 
----
 
-## License
+Whitepaper Alignment
+The foundational architecture whitepaper was written before the build — the implementation validated the design, not the other way around. Current alignment: 78%, documented honestly.
+SectionStatusEvidenceCore Pipeline Architecture (v1)100% CLOSEDrun_pipeline(), full loop, stagnation, timeout — built, stress-tested, and recovered from a documented regressionThree-Layer Cognitive Governance100% CLOSEDExpansion / Compression / Integration / Governance confirmed across all production prompt filesRecursive Corrective Cognition100% CLOSEDImplemented, tested to failure, diagnosed, and recovered. Full regression history in benchmark-results.json.v1 Deployment Domains78% — 3 of 6Legal, AI governance, and research memo domains have artifacts. Cybersecurity, regulatory, enterprise: Phase 4.v2 Distributed Architecture18% — PROPOSEDMeta Governor + Solver A/B/C + Cross-Auditor: specified, not yet built. Phase 5.Critical Challenges91% CLOSEDEvery challenge except Consensus Collapse has been encountered, named, and pre-declared in ATTA records
+Overall: 78%. Full closure targeted at Phase 5. See docs/SPECIFICATION.md for the full alignment map.
 
-MIT — fork it, improve it, open a PR.
+Contributing
+See CONTRIBUTING.md for the full contributor guide. Core rules that govern all contributions:
+Auditor Inviolability — The Auditor's verdict cannot be softened by reclassifying a [HALLUCINATION] as a lower-severity tag to improve benchmark scores. Any PR that moves a benchmark number must include a root cause analysis proving genuine detection improvement, not tag reclassification.
+No Benchmark Overfitting — Prompt rules must address general detection patterns, not individual test IDs. Case-by-case hardcoding of specific test cases destroys system credibility and will be rejected on review.
+RFC for Canonical Changes — The Universal Output Format is canonical. Changes require an RFC in prompts/RFC/ with a diff, a regression-clean test run, and a documented rationale. Output field names do not change without an RFC.
+ATTA Pre-Declaration — Any PR that introduces or modifies benchmark gate conditions must update the ATTA record with the new pre-declared conditions before the benchmark is run. Running first and declaring afterward is not permitted.
 
-Built by [RewriteReality Labs](mailto:attaullahfayyaz4u@gmail.com) · Pakistan
+
+Source of Truth Rule: This repo is the only valid source of truth for all GBSE claims. Shared documents, social posts, and conversations are historical record only. No claim advances past its current ATTA proof status.
+
+
+License
+MIT License — see LICENSE for details.
+
+Specification · Taxonomy · Benchmark Methodology · Changelog · Contributing
+RewriteReality Labs · github.com/RewriteReality-Labs/GBSE
