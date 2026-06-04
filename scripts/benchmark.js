@@ -22,16 +22,35 @@ import { join } from "path";
 import { runPipeline } from "../src/index.js";
 import { TEST_SUITE } from "../tests/suite.js";
 
+<<<<<<< HEAD
 function buildProvenance() {
   let repoCommit = 'unavailable';
   try {
     const execSync = _execSync;
-    repoCommit = execSync('git rev-parse HEAD', {stdio:'pipe'}).toString().trim().slice(0,12);
+    repoCommit = _execSync('git rev-parse HEAD', {stdio:'pipe'}).toString().trim().slice(0,12);
   } catch {}
   return {
     repoCommit,
     model: process.env.GBSE_MODEL || 'claude-sonnet-4-20250514',
     temperature: 0,
+=======
+
+
+
+function buildProvenance() {
+  let repoCommit = 'unavailable';
+  try { repoCommit = _execSync('git rev-parse HEAD', {stdio:'pipe'}).toString().trim().slice(0,12); } catch {}
+  return {
+    repoCommit,
+    suiteHash: sha256File('tests/suite.js'),
+    auditorPromptHash: sha256File('prompts/v1/auditor.txt'),
+    solverPromptHash: sha256File('prompts/v1/solver.txt'),
+    reconstructorPromptHash: sha256File('prompts/v1/reconstructor.txt'),
+    benchmarkScriptHash: sha256File('scripts/benchmark.js'),
+    model: process.env.GBSE_MODEL || 'claude-sonnet-4-20250514',
+    temperature: 0,
+    maxIterations: parseInt(process.env.GBSE_MAX_ITERATIONS || '3'),
+>>>>>>> phase2/official-benchmark
     runMode: process.env.GBSE_OFFICIAL ? 'official' : 'local',
   };
 }
@@ -91,6 +110,7 @@ export function calculateMetrics(results) {
   };
 }
 
+<<<<<<< HEAD
 
 function sha256File(filePath) {
   return createHash("sha256")
@@ -126,6 +146,9 @@ function parsePercent(value) {
 }
 
 const RUNS = parseInt((process.argv || []).find(a => typeof a === 'string' && a.startsWith('--runs='))?.split('=')[1] || '1');
+=======
+const RUNS = parseInt(process.argv.find(a => a.startsWith('--runs='))?.split('=')[1] || '1');
+>>>>>>> phase2/official-benchmark
 const IS_OFFICIAL = !!process.env.GBSE_OFFICIAL;
 const RESULTS_FILE = IS_OFFICIAL ? 'benchmark-results.json' : 'benchmark-results.local.json';
 
