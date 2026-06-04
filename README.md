@@ -1,13 +1,14 @@
 # GBSE — Great Bifurcation Synthesis Engine
 
-> A recursive three-layer AI governance pipeline that forces language models to produce **verified, auditable outputs** — not confident confabulation. Every claim passes a Solver, survives an Auditor, and is reconstructed with a correction log before it exits the pipeline.
+> A recursive three-layer AI governance pipeline that forces language models through audit, correction, and reconstruction before output. Every claim passes a Solver, survives an Auditor, and is rebuilt with a correction log before it exits the pipeline.
 
 ![CI](https://github.com/RewriteReality-Labs/GBSE/actions/workflows/test.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)
 ![Tests](https://img.shields.io/badge/tests-56%20active-informational)
-![Benchmark](https://img.shields.io/badge/benchmark-90.5%25%20flag%20detection-brightgreen)
+![Benchmark](https://img.shields.io/badge/benchmark-90.5%25%20flag%20detection-blue)
+![OfficialValid](https://img.shields.io/badge/officialValid-true-brightgreen)
 ![ATTA](https://img.shields.io/badge/ATTA-BENCHMARK__002%20AFFIRMED-brightgreen)
 
 ---
@@ -15,6 +16,7 @@
 ## Table of Contents
 
 - [Current Proof Status](#current-proof-status)
+- [What GBSE Is / Is Not](#what-gbse-is--is-not)
 - [Architecture](#architecture)
 - [Benchmark History](#benchmark-history)
 - [Quickstart](#quickstart)
@@ -38,7 +40,27 @@
 | Official run | 3 runs · `officialValid: true` · 0 errors · proof commit `5f62d2c` | `AFFIRMED ✅` |
 | ATTA record | `ATTA_GBSE_BENCHMARK_002` — **AFFIRMED** · tag `v1.0.0-atta.affirmed` | `SEALED` |
 
+### Proof Artifacts
 
+- Official result file: [`benchmark-results.json`](benchmark-results.json)
+- Release tag: [`v1.0.0-atta.affirmed`](https://github.com/RewriteReality-Labs/GBSE/releases/tag/v1.0.0-atta.affirmed)
+- Benchmark code commit: `19b946da4666`
+- Proof/result commit: `5f62d2c230f50e19e4484a3d8f78039b08ccf017`
+- Run mode: `official`
+- Model: `claude-sonnet-4-20250514`
+- Temperature: `0`
+
+---
+
+## What GBSE Is / Is Not
+
+### What GBSE Is
+
+GBSE is an AI-output governance pipeline. It evaluates whether a model response contains hallucinated claims, unsupported assertions, logical gaps, or empty filler, then reconstructs the answer with a correction log.
+
+### What GBSE Is Not
+
+GBSE is not a generic chatbot, not a RAG framework, not a legal-advice engine, and not a replacement for domain experts. It is a verification and correction layer for high-risk model outputs.
 
 ---
 
@@ -83,7 +105,7 @@ CONFIDENCE:     VERIFIED | ASSUMED | DEBATABLE
 
 ## Benchmark History
 
-> This is not a static score. The regression and recovery are **more credible than a clean number with no history.** No competitor has published theirs.
+> This is not a static score. The regression and recovery history are part of the proof: GBSE records not only its successful benchmark state, but also the failure mode that caused a regression and the exact recovery path that restored benchmark validity.
 
 **`ATTA_GBSE_BENCHMARK_001` · Initial run**
 - Core pipeline built: `run_pipeline()`, solver v1, auditor v1, reconstructor v1
@@ -126,6 +148,36 @@ CONFIDENCE:     VERIFIED | ASSUMED | DEBATABLE
 
 ## Quickstart
 
+**Try GBSE on one query:**
+
+```javascript
+// Node.js — minimal usage
+const { runPipeline } = require('./src/index');
+
+const result = await runPipeline(
+  "The Eiffel Tower was built in 1952 and stands in Berlin."
+);
+
+console.log(result.verdict);        // FAIL
+console.log(result.auditFindings);  // [HALLUCINATION]
+console.log(result.correctionLog);  // Structured correction with source trace
+console.log(result.iterations);     // Number of loop iterations before resolution
+```
+
+```python
+# Python reference
+from gbse import run_pipeline
+
+result = run_pipeline(
+    "The Eiffel Tower was built in 1952 and stands in Berlin."
+)
+print(result.verdict)         # FAIL
+print(result.audit_findings)  # [HALLUCINATION]
+print(result.correction_log)  # Structured correction
+```
+
+
+
 ### Prerequisites
 
 - Node.js 18+
@@ -164,8 +216,10 @@ node scripts/benchmark.js --runs=3 | tee benchmark-official-output.txt
 ```powershell
 $env:GBSE_OFFICIAL="true"
 $env:GBSE_CONCURRENCY="1"
-node scripts\benchmark.js --runs=3 *> benchmark-official-output.txt
+node scripts\benchmark.js --runs=3 2>&1 | Tee-Object -FilePath benchmark-official-output.txt
 ```
+
+> **API quota notice:** Official mode runs 168 total executions (`56 tests × 3 runs`) and may consume significant API quota. Use local mode for development. Use official mode only when recording a benchmark proof artifact.
 
 ### Python (reference)
 
@@ -195,7 +249,7 @@ Four output tags. Each has a precise definition. Ambiguity in tagging is itself 
 
 ## The 12 Laws
 
-Applied by the Auditor on every iteration. `HARD BLOCK` violations terminate the pipeline immediately — no output is produced.
+Applied by the Auditor on every iteration. `HARD BLOCK` violations prevent an unqualified `PASS` and route the case to a fail-safe state. The system may return a structured failure or diagnostic output, but must not produce a normal verified answer while the hard-block condition remains unresolved.
 
 | Law | Name | Rule | Severity |
 |---|---|---|---|
@@ -225,7 +279,7 @@ The EC (Escape Class) taxonomy defines named adversarial patterns the pipeline i
 | EC-21 – EC-25 | Advanced adversarial patterns. **EC-25: Context Drift / Stale-State** — the anchor case that validated the entire framework against a real scenario before any code was written. |
 | EC-26 | **Origin Decay Defense.** A dispute has drifted so far from the original obligation that the current claim no longer traces to what was established. Pipeline field: `originClauseLoaded`. |
 | EC-27 | **Compounding Ambiguity Loop.** New claims introduced faster than any can be resolved. Orchestrator Claim Freeze fires. Pipeline field: `activeClaimCount`. |
-| EC-26×27 + EC-27×26 | **Cross-injection · HARD BLOCK.** When EC-26 and EC-27 fire simultaneously, the pipeline hard-blocks — no output until both are resolved in sequence. Directional: EC-26×27 ≠ EC-27×26. |
+| EC-26×27 + EC-27×26 | **Cross-injection · HARD BLOCK.** When EC-26 and EC-27 fire simultaneously, the pipeline routes to fail-safe — no verified answer until both are resolved in sequence. Directional: EC-26×27 ≠ EC-27×26. |
 
 > **Note on scope:** The EC taxonomy was developed for adversarial output-verification scenarios. It shares structural convergence with the Solver/Auditor/Reconstructor/Orchestrator pipeline pattern. See `docs/SPECIFICATION.md` for full class definitions and test cases.
 
@@ -253,7 +307,7 @@ GBSE/
 │   ├── SPECIFICATION.md
 │   ├── HALLUCINATION_TAXONOMY.md
 │   └── BENCHMARK_METHODOLOGY.md
-├── benchmark-results.json           — Live benchmark output (ATTA ground truth)
+├── benchmark-results.json           — Official benchmark proof artifact
 ├── package.json                     — Node.js project manifest
 ├── package-lock.json                — npm dependency lockfile
 ├── requirements.txt                 — Python dependencies
@@ -296,8 +350,8 @@ promptHashes            present in result
 |---|---|---|---|
 | 1 | **PROVE** | ✅ Complete | AFFIRMED status · tagged release `v1.0.0-atta.affirmed` |
 | 2 | **SIGNAL** | Week 1 post-AFFIRMED | ATTA record public · repo announcement |
-| 3 | **EARN** | Weeks 2–3 | Paid governance audit service · subscription tooling |
-| 4 | **CLOSE** | Month 2 | Whitepaper gap closed · Product Hunt launch |
+| 3 | **EARN** | Weeks 2–3 | Governance audit service · tooling release |
+| 4 | **CLOSE** | Month 2 | Whitepaper gap closed · public launch |
 | 5 | **V2** | Months 7–18 | Meta Governor + Solver A/B/C + Cross-Auditor |
 
 > Source of truth for all phase claims: **this repo only.** No social post, no document, no conversation overrides the repo state.
@@ -306,7 +360,7 @@ promptHashes            present in result
 
 ## Whitepaper Alignment
 
-The foundational architecture whitepaper was written **before** the build — the implementation validated the design, not the other way around. Current alignment: **78%**, documented honestly.
+The foundational architecture whitepaper was written **before** the build — the implementation validated the design, not the other way around. Current implementation alignment is estimated at **78%** against the original specification. The percentages below reflect the maintainer's assessment against the specification in [`docs/SPECIFICATION.md`](docs/SPECIFICATION.md).
 
 | Section | Status | Evidence |
 |---|---|---|
