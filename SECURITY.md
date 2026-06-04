@@ -4,22 +4,22 @@
 
 | Version | Supported |
 |---|---|
-| `v1.0.0-atta.affirmed` | ✅ Active |
-| `main` | ✅ Active |
+| `v1.0.0-atta.affirmed` | Active |
+| `main` | Active |
 
 ## Reporting a vulnerability
 
-**Do not open a public GitHub issue for security vulnerabilities.**
+Do not open a public GitHub issue for security vulnerabilities.
 
 Report privately via GitHub Security Advisories:
-[github.com/RewriteReality-Labs/GBSE/security/advisories/new](https://github.com/RewriteReality-Labs/GBSE/security/advisories/new)
+https://github.com/RewriteReality-Labs/GBSE/security/advisories/new
 
-**Response target:** 72 hours for acknowledgement.
-**Resolution target:** 14 days for confirmed vulnerabilities.
+Response target: 72 hours for acknowledgement.
+Resolution target: 14 days for confirmed vulnerabilities.
 
 ## Scope
 
-**In scope:**
+In scope:
 - Pipeline logic errors that produce incorrect `PASS` verdicts
 - Benchmark scoring manipulation via crafted inputs
 - Prompt injection paths that bypass audit controls
@@ -28,7 +28,7 @@ Report privately via GitHub Security Advisories:
 - Secrets exposure
 - Dependency vulnerabilities in `package.json` or `requirements.txt`
 
-**Out of scope:**
+Out of scope:
 - Theoretical attacks with no practical reproduction path
 - Rate limiting or quota issues on the Anthropic API
 - Requests to weaken benchmark gates or bypass ATTA governance
