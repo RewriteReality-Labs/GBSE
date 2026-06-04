@@ -22,7 +22,7 @@
   "author": "RewriteReality Labs",
   "license": "MIT",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.51.0",
+    "@anthropic-ai/sdk": "^0.100.1",
     "dotenv": "^16.4.5",
     "chalk": "^5.3.0"
   },
