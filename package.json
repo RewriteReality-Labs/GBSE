@@ -1,7 +1,7 @@
 {
   "name": "gbse",
   "version": "1.2.0",
-  "description": "Great Bifurcation Synthesis Engine — Zero-Hallucination AI Verification Pipeline",
+  "description": "Adversarial benchmark framework for auditing model failure modes and documenting corrections.",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
