@@ -402,3 +402,16 @@ MIT License — see [`LICENSE`](LICENSE) for details.
 [Specification](docs/SPECIFICATION.md) · [Taxonomy](docs/HALLUCINATION_TAXONOMY.md) · [Benchmark Methodology](docs/BENCHMARK_METHODOLOGY.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
 
 **RewriteReality Labs · [github.com/RewriteReality-Labs/GBSE](https://github.com/RewriteReality-Labs/GBSE)**
+
+## Launch Transparency
+
+GBSE is an adversarial benchmark framework for auditing model failure modes and documenting corrections. It does not claim zero hallucination or perfect detection.
+
+The public launch posture is intentionally separated into active law, critique, proposed future law, and correction examples:
+
+- [Public discussion launch draft](docs/public-discussion-launch.md)
+- [Methodology critique anchor](docs/methodology-critique.md)
+- [Taxonomy v1.1 dependency escalation RFC](docs/RFC/taxonomy-v1.1-dependency-escalation.md)
+- [Correction log sample output](examples/correction-log-sample.md)
+
+The active taxonomy remains in `docs/HALLUCINATION_TAXONOMY.md`. Proposed taxonomy changes are staged as RFC and are not silently treated as proven benchmark law.
