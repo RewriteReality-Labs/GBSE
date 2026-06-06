@@ -148,12 +148,10 @@ CONFIDENCE:     VERIFIED | ASSUMED | DEBATABLE
 
 ## Quickstart
 
-**Try GBSE on one claim:**
-
-Run GBSE directly from GitHub using the verified npm-exec path:
+Run GBSE against a single claim:
 
 ```bash
-npm exec --yes --package "github:RewriteReality-Labs/GBSE" -- gbse "The Eiffel Tower was built in 1952 and stands in Berlin."
+npx --yes @rewriterealitylabs/gbse "The Eiffel Tower was built in 1952 and stands in Berlin."
 ```
 
 Or clone and run locally:
@@ -168,13 +166,14 @@ node bin/gbse.js "The Eiffel Tower was built in 1952 and stands in Berlin."
 ```
 
 **PowerShell:**
-
 ```powershell
 $env:ANTHROPIC_API_KEY="your_key_here"
 node .\bin\gbse.js "The Eiffel Tower was built in 1952 and stands in Berlin."
 ```
 
 > Quick-run output is not an ATTA benchmark affirmation.
+> Run npx from outside the repo directory to avoid local package resolution conflicts.
+
 
 
 ### Prerequisites
@@ -297,12 +296,9 @@ GBSE/
 ├── prompts/
 │   ├── v1/                          — Production prompt files
 │   └── RFC/                         — Candidate prompts under review
-├── bin/
-│   └── gbse.js                      — Quick-run CLI entry point
 ├── tests/
 │   ├── pipeline.test.js             — 39 unit tests (2 suites)
-│   ├── benchmark-metrics.test.js    — Benchmark gate validation
-│   └── cli.test.js                  — CLI smoke tests (4 tests, no API calls)
+│   └── benchmark-metrics.test.js   — Benchmark gate validation
 ├── scripts/
 │   └── benchmark.js                 — 56-test active benchmark runner
 ├── docs/
