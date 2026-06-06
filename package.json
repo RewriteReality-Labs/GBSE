@@ -39,6 +39,6 @@
     "node": ">=18.0.0"
   },
   "bin": {
-    "gbse": "./bin/gbse.js"
+    "gbse": "bin/gbse.js"
   }
 }
