@@ -148,34 +148,33 @@ CONFIDENCE:     VERIFIED | ASSUMED | DEBATABLE
 
 ## Quickstart
 
-**Try GBSE on one query:**
+**Try GBSE on one claim:**
 
-```javascript
-// Node.js — minimal usage
-const { runPipeline } = require('./src/index');
+Run GBSE directly from GitHub using the verified npm-exec path:
 
-const result = await runPipeline(
-  "The Eiffel Tower was built in 1952 and stands in Berlin."
-);
-
-console.log(result.verdict);        // FAIL
-console.log(result.auditFindings);  // [HALLUCINATION]
-console.log(result.correctionLog);  // Structured correction with source trace
-console.log(result.iterations);     // Number of loop iterations before resolution
+```bash
+npm exec --yes --package "github:RewriteReality-Labs/GBSE" -- gbse "The Eiffel Tower was built in 1952 and stands in Berlin."
 ```
 
-```python
-# Python reference
-from gbse import run_pipeline
+Or clone and run locally:
 
-result = run_pipeline(
-    "The Eiffel Tower was built in 1952 and stands in Berlin."
-)
-print(result.verdict)         # FAIL
-print(result.audit_findings)  # [HALLUCINATION]
-print(result.correction_log)  # Structured correction
+```bash
+git clone https://github.com/RewriteReality-Labs/GBSE.git
+cd GBSE
+npm install
+cp .env.example .env
+# Add your ANTHROPIC_API_KEY to .env
+node bin/gbse.js "The Eiffel Tower was built in 1952 and stands in Berlin."
 ```
 
+**PowerShell:**
+
+```powershell
+$env:ANTHROPIC_API_KEY="your_key_here"
+node .\bin\gbse.js "The Eiffel Tower was built in 1952 and stands in Berlin."
+```
+
+> Quick-run output is not an ATTA benchmark affirmation.
 
 
 ### Prerequisites
