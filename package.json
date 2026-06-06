@@ -1,6 +1,6 @@
 {
   "name": "@rewriterealitylabs/gbse",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Adversarial benchmark framework for auditing model failure modes and documenting corrections.",
   "main": "src/index.js",
   "type": "module",

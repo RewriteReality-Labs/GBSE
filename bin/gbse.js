@@ -33,7 +33,7 @@ const HELP = [
 const args = process.argv.slice(2);
 
 if (args.includes('--help') || args.includes('-h')) {
-  process.stdout.write(HELP + "\n");
+  console.log(HELP);
   process.exit(0);
 }
 
@@ -53,8 +53,8 @@ if (!process.env.ANTHROPIC_API_KEY) {
 
 const claim = args.join(' ');
 
-process.stdout.write("\n--- GBSE Quick Run -----------------------------------------\n");
-process.stdout.write("\nInput claim:\n" + claim + "\n\n");
+console.log('\n--- GBSE Quick Run -----------------------------------------');
+console.log('\nInput claim:\n' + claim);
 
 (async () => {
   try {
@@ -66,12 +66,12 @@ process.stdout.write("\nInput claim:\n" + claim + "\n\n");
     const iterations = diagnostics.iterations ?? '?';
     const findings = diagnostics.findingsCount ?? diagnostics.findings?.length ?? '?';
 
-    process.stdout.write("\n--- Result -------------------------------------------------\n");
-    process.stdout.write("\nAudit verdict:  " + verdict + "\n");
-    process.stdout.write("Iterations:     " + iterations + "\n");
-    process.stdout.write("Findings:       " + findings + "\n");
-    process.stdout.write("\n------------------------------------------------------------\n");
-    process.stdout.write("Quick-run output is not an ATTA benchmark affirmation.\n\n");
+    console.log("\n--- Result -------------------------------------------------\n");
+    console.log("\nAudit verdict:  " + verdict + "\n");
+    console.log("Iterations:     " + iterations + "\n");
+    console.log("Findings:       " + findings + "\n");
+    console.log("\n------------------------------------------------------------\n");
+    console.log("Quick-run output is not an ATTA benchmark affirmation.\n\n");
     process.exit(0);
   } catch (err) {
     process.stderr.write("\nPipeline error: " + (err?.message ?? err) + "\n");
