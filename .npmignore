@@ -28,3 +28,7 @@ _*.mjs
 write-*.cjs
 *.tmp
 *.log
+
+# Local npx diagnostics
+npx-*.txt
+gbse-*.tgz
