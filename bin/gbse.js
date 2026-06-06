@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -54,6 +54,7 @@ const claim = args.join(' ');
 process.stdout.write('\n─── GBSE Quick Run ─────────────────────────────────────────\n');
 process.stdout.write('\nInput claim:\n' + claim + '\n\n');
 
+(async () => {
 try {
   const { runPipeline } = await import('../src/index.js');
   const result = await runPipeline(claim);
@@ -70,6 +71,8 @@ try {
   process.exit(0);
 
 } catch (err) {
-  process.stderr.write('\nPipeline error: ' + err.message + '\n');
+  process.stderr.write('\nPipeline error: ' + (err?.message ?? err) + '\n');
   process.exit(2);
 }
+})();
+

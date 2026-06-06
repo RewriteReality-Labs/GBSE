@@ -1,0 +1,30 @@
+# Development and local environment
+.env
+.env.*
+
+# Benchmark outputs and local run artifacts
+benchmark-results.json
+benchmark-results.local.json
+
+# Development-only directories
+docs/
+scripts/
+tests/
+.github/
+examples/
+
+# RFC / proposed prompt drafts are not runtime package assets
+prompts/RFC/
+
+# Repo/community files not required at runtime
+CHANGELOG.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+SECURITY.md
+ISSUE_TEMPLATE.md
+
+# Temporary local scripts and repair artifacts
+_*.mjs
+write-*.cjs
+*.tmp
+*.log
