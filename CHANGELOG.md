@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.2.1] -- 2026-06-06
+
+### Fixed
+- Replaced `process.stdout.write` with `console.log` in `bin/gbse.js` for Windows PowerShell package execution compatibility
+- Restored README encoding to clean UTF-8 -- removed BOM and repaired mojibake introduced during PR #37 PowerShell file writes
+- Corrected `cli.test.js` missing from README Repository Structure
+- Clarified structural test description in Repository Structure section
+
+### Added
+- `docs/cases/GBSE_REAL_WORLD_CASE_002.md` -- EC-04 Confident Confabulation case: GBSE blocked an internal false-premise diagnosis before an unnecessary structural fix shipped
+- `docs/cases/GBSE_REAL_WORLD_CASE_001.md` -- real-world COD reconciliation audit case
+- Category G added to CATEGORY_DESCRIPTIONS in suite.js for EC-25 stale-state reasoning
+
+## [1.2.0] -- 2026-06-05
+
+### Added
+- `bin/gbse.js` -- quick-run CLI entry point
+- Package `bin` field mapping `gbse` command to `bin/gbse.js`
+- `tests/cli.test.js` -- 4 CLI smoke tests, zero API calls
+- `.npmignore` -- runtime-only package boundary for npm publish
+- Published as `@rewriterealitylabs/gbse` on npm registry
+
+### Fixed
+- Renamed package from `gbse` to `@rewriterealitylabs/gbse` -- npm rejected unscoped name as too similar to existing packages
+- Corrected `bin` path from `./bin/gbse.js` to `bin/gbse.js` for npm publish validation
+
+### Changed
+- README Quickstart updated to reflect published npm package path
+- Repository Structure updated to include `bin/` and `cli.test.js`
+
 ## [1.2.0] — 2026-05-14
 
 ### Fixed
