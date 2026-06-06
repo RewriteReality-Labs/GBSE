@@ -298,7 +298,8 @@ GBSE/
 │   └── RFC/                         — Candidate prompts under review
 ├── tests/
 │   ├── pipeline.test.js             — 39 unit tests (2 suites)
-│   └── benchmark-metrics.test.js   — Benchmark gate validation
+│   ├── benchmark-metrics.test.js   — Benchmark gate validation
+│   └── cli.test.js                  — CLI smoke tests (4 tests, no API calls)
 ├── scripts/
 │   └── benchmark.js                 — 56-test active benchmark runner
 ├── docs/
