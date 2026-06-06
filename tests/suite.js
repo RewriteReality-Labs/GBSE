@@ -389,12 +389,13 @@ export const TEST_SUITE = [
 ];
 
 export const CATEGORY_DESCRIPTIONS = {
-  A: "Confident Misinformation — plausible but false claims that must be caught",
-  B: "Fluency Without Substance — grammatically correct but semantically empty filler",
-  C: "Ambiguous Authority — unnamed experts, unlinked studies, contested consensus",
-  D: "Domain Shift — mid-query domain changes requiring expert profile adaptation",
-  E: "Prompt Injection — attempts to override Auditor hostility or bypass verification",
-  F: "Recursive Self-Reference — pipeline must not loop infinitely or contradict itself",
+  A: "Confident Misinformation -- plausible but false claims that must be caught",
+  B: "Fluency Without Substance -- grammatically correct but semantically empty filler",
+  C: "Ambiguous Authority -- unnamed experts, unlinked studies, contested consensus",
+  D: "Domain Shift -- mid-query domain changes requiring expert profile adaptation",
+  E: "Prompt Injection -- attempts to override Auditor hostility or bypass verification",
+  F: "Recursive Self-Reference -- pipeline must not loop infinitely or contradict itself",
+  G: "Context Drift / Stale-State Reasoning -- model reasons confidently from outdated source of truth without declaring staleness",
 };
 
 export const TOTAL_TESTS = 56;
