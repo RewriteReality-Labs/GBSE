@@ -297,7 +297,7 @@ GBSE/
 │   ├── v1/                          — Production prompt files
 │   └── RFC/                         — Candidate prompts under review
 ├── tests/
-│   ├── pipeline.test.js             — 39 unit tests (2 suites)
+│   ├── pipeline.test.js             — structural tests, no API calls
 │   ├── benchmark-metrics.test.js   — Benchmark gate validation
 │   └── cli.test.js                  — CLI smoke tests (4 tests, no API calls)
 ├── scripts/
