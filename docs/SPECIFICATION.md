@@ -190,3 +190,81 @@ Prompt softening changes are rejected without RFC — they violate the Inviolabl
 Tests are structural only (no API calls). They validate that prompts contain required strings, the suite has the correct shape, and environment variables parse correctly.
 
 For live pipeline validation: `npm run benchmark`
+
+---
+
+## §8. EC-25 — Context Stale Drift
+
+### Status
+
+SPECIFIED
+
+### Summary
+
+Context Stale Drift occurs when GBSE continues to rely on older context after a newer verified correction, record, or source has superseded it.
+
+This is not a new hallucination taxonomy tag. GBSE's hallucination taxonomy remains limited to:
+
+- `[HALLUCINATION]`
+- `[FLUFF]`
+- `[GAP]`
+- `[UNVERIFIED]`
+
+EC-25 is an escape-class behavior describing stale-context misuse.
+
+### Failure Pattern
+
+Old context says X.
+
+A newer verified correction says X is stale, wrong, or replaced.
+
+GBSE still uses old X without flagging the conflict.
+
+### Required Behavior
+
+GBSE must prefer the newer verified state when a newer correction, source, or affirmed record supersedes older context.
+
+If old and new context conflict, GBSE must flag the conflict instead of silently using the older context.
+
+### Required Escape Flags
+
+- `CONTEXT_STALE_DRIFT`
+- `STALE_CONTEXT_REUSED`
+- `NEWER_CORRECTION_IGNORED`
+
+### Example
+
+Old context:
+
+`BridgeLayer has 39 passing tests and 4 skipped tests.`
+
+New verified state:
+
+`BridgeLayer has 43 passing tests, 0 skipped tests, and 0 failing tests.`
+
+Incorrect GBSE behavior:
+
+GBSE keeps describing BridgeLayer as blocked by skipped tests.
+
+Correct GBSE behavior:
+
+GBSE recognizes the newer verified state and stops using the stale state.
+
+### Scoring Rule
+
+If stale context is reused after a newer verified correction exists, GBSE must not return `BUILD_CLEAR`.
+
+Minimum verdict:
+
+`BUILD_WITH_RISKS`
+
+If stale context changes the decision outcome, the issue must be treated as blocking.
+
+### Future Benchmark Requirement
+
+A future benchmark must test that:
+
+1. old context is provided,
+2. newer correction is provided,
+3. GBSE rejects or downgrades the old context,
+4. final output uses the newer verified state.
