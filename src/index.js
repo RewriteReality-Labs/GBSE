@@ -175,3 +175,4 @@ if (process.argv[1]?.endsWith("index.js")) {
   }
   runPipeline(query).catch(console.error);
 }
+
