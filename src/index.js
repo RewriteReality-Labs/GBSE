@@ -49,6 +49,8 @@ export async function runPipeline(query, options = {}) {
   let passed = false;
   let hardBlocked = false;          // Change 2a: track HARD BLOCK as distinct terminal state
   let previousFlags = null;         // for stagnation detection
+  let stagnated = false;            // BridgeLayer contract: true when loop exits due to stagnation
+  let stagnationTags = [];          // BridgeLayer contract: normalized repeated finding set
 
   log("normal", "\n─── GBSE PIPELINE START ───────────────────────────────────");
   log("normal", `Query: ${query}\n`);
@@ -113,6 +115,8 @@ const currentFlags = auditResult.findings
   .sort()
   .join("|");
     if (previousFlags !== null && currentFlags === previousFlags) {
+      stagnated = true;
+      stagnationTags = currentFlags ? currentFlags.split("|").filter(Boolean) : [];
       log("normal", "  → [STAGNATION DETECTED] Identical flags on consecutive iterations — breaking loop early.\n");
       break;
     }
@@ -150,6 +154,9 @@ const currentFlags = auditResult.findings
     correctionLog: finalResult.correctionLog,
     diagnostics: {
       iterations,
+      iterationCount: iterations,
+      stagnated,
+      stagnationTags,
       passed,
       auditVerdict: auditPassed      ? "PASS"
                   : auditPartialPass ? "PARTIAL_PASS"

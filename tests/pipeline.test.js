@@ -17,6 +17,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const solverPrompt = readFileSync(join(__dirname, "../prompts/v1/solver.txt"), "utf8");
 const auditorPrompt = readFileSync(join(__dirname, "../prompts/v1/auditor.txt"), "utf8");
 const reconstructorPrompt = readFileSync(join(__dirname, "../prompts/v1/reconstructor.txt"), "utf8");
+const indexSource = readFileSync(join(__dirname, "../src/index.js"), "utf8");
 
 describe("GBSE Suite Structure", () => {
   test("Suite contains exactly 56 tests", () => { expect(TEST_SUITE.length).toBe(56); });
@@ -127,5 +128,13 @@ describe("GBSE Taxonomy Completeness", () => {
       expect(t).toHaveProperty("mustNotPass");
       expect(t.mustNotPass).toBe(true);
     }
+  });
+});
+
+describe("GBSE BridgeLayer Contract", () => {
+  test("runPipeline exposes BridgeLayer-facing stagnation diagnostics contract", () => {
+    expect(indexSource).toContain("iterationCount: iterations");
+    expect(indexSource).toContain("stagnated");
+    expect(indexSource).toContain("stagnationTags");
   });
 });
