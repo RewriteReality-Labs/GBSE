@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- Exposed the BridgeLayer-facing `runPipeline()` stagnation contract by returning `diagnostics.iterationCount`, `diagnostics.stagnated`, and `diagnostics.stagnationTags`.
+
 ## [1.2.1] -- 2026-06-06
 
 ### Fixed
