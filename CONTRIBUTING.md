@@ -26,7 +26,7 @@ All four gates must pass before requesting review:
 
 | Gate | Requirement |
 |------|-------------|
-| **1 — Tests** | All 48 tests pass locally (`npm test`). CI must also be green. A red CI is an automatic [FAIL]. |
+| **1 — Tests** | All 56 tests pass locally (`npm test`). CI must also be green. A red CI is an automatic [FAIL]. |
 | **2 — Audit Diff** | Run `npm run audit-diff` before and after your change. Attach both outputs showing what changed. |
 | **3 — No Prompt Softening** | If you modified `prompts/auditor.txt`, explain why the change does not reduce audit severity. |
 | **4 — Changelog** | Update `CHANGELOG.md` with what your change catches differently. |
