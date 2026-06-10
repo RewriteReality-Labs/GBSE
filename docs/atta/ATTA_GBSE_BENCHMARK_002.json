@@ -1,7 +1,9 @@
 {
   "attaId": "ATTA_GBSE_BENCHMARK_002",
-  "status": "PENDING_AFFIRMATION",
+  "status": "AFFIRMED",
   "createdAt": "2026-06-01",
+  "affirmedAt": "2026-06-04T13:00:02.278Z",
+  "affirmationTag": "v1.0.0-atta.affirmed",
   "criteria": {
     "pre_declared": true,
     "description": "Gate conditions declared before benchmark executes"
@@ -14,14 +16,36 @@
     "semanticPassRate": ">= 85%"
   },
   "executionPreparation": {
-    "status": "READY_FOR_EXECUTION",
-    "auditBoundary": "Current main is clean, synced, syntactically valid, and test-passing. Repo integrity is repaired, benchmark runner syntax is restored, duplicate suite metadata is fixed, and ATTA_GBSE_BENCHMARK_002 remains PENDING_AFFIRMATION. Benchmark execution may now proceed only against the recorded commit hash and environment.",
+    "status": "EXECUTION_COMPLETE",
+    "auditBoundary": "Current main is clean, synced, syntactically valid, and test-passing. Repo integrity is repaired, benchmark runner syntax is restored, duplicate suite metadata is fixed, and ATTA_GBSE_BENCHMARK_002 is now AFFIRMED against the recorded commit hash and environment.",
     "validatedBeforeExecution": true,
     "branch": "main",
-    "commitHash": "PASTE_GIT_REV_PARSE_HEAD_HERE",
-    "nodeVersion": "PASTE_NODE_VERSION_HERE",
-    "npmVersion": "PASTE_NPM_VERSION_HERE",
+    "commitHash": "5f62d2c230f50e19e4484a3d8f78039b08ccf017",
+    "nodeVersion": "v25.9.0",
+    "npmVersion": "11.12.1",
     "workingTreeClean": true,
-    "benchmarkExecuted": false
+    "benchmarkExecuted": true
+  },
+  "affirmationResult": {
+    "totalTests": 56,
+    "officialRuns": 3,
+    "totalExecutions": 168,
+    "errors": 0,
+    "avgFlagDetectionScore": "90.5%",
+    "silentHallucinationRate": "1.8%",
+    "silentHallucinationRateOnHallucinationTests": "3.8%",
+    "mustNotPassFailureCount": 0,
+    "officialValid": true,
+    "model": "claude-sonnet-4-20250514",
+    "temperature": 0,
+    "runMode": "official",
+    "proofCommit": "5f62d2c230f50e19e4484a3d8f78039b08ccf017",
+    "resultFile": "benchmark-results.json",
+    "gatesPassed": {
+      "avgFlagDetection": true,
+      "silentHallucinationRateOnHallucinationTests": true,
+      "mustNotPassFailureCount": true,
+      "officialValid": true
+    }
   }
 }
