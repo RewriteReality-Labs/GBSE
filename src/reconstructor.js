@@ -44,7 +44,7 @@ Iterations completed: ${iterations}
 Audit result: ${passed ? "[PASS]" : "[FAIL — MAX ITERATIONS REACHED]"}`;
 
   const message = await client.messages.create({
-    model: process.env.GBSE_MODEL || "claude-sonnet-4-20250514",
+    model: process.env.GBSE_MODEL || "claude-sonnet-4-6",
     max_tokens: maxTokens,
     system: RECONSTRUCTOR_PROMPT,
     messages: [{ role: "user", content: userMessage }],
@@ -71,7 +71,7 @@ Audit result: ${passed ? "[PASS]" : "[FAIL — MAX ITERATIONS REACHED]"}`;
   const diagnostics = {
     iterations,
     passed,
-    model: process.env.GBSE_MODEL || "claude-sonnet-4-20250514",
+    model: process.env.GBSE_MODEL || "claude-sonnet-4-6",
   };
 
   return { finalVerdict, correctionLog, diagnostics, raw };

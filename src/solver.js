@@ -25,7 +25,7 @@ export async function runSolver(client, query, auditCritique = null) {
     : `Query: ${query}`;
 
   const message = await client.messages.create({
-    model: process.env.GBSE_MODEL || "claude-sonnet-4-20250514",
+    model: process.env.GBSE_MODEL || "claude-sonnet-4-6",
     max_tokens: maxTokens,
     system: SOLVER_PROMPT,
     messages: [{ role: "user", content: userMessage }],

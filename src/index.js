@@ -163,7 +163,7 @@ const currentFlags = auditResult.findings
                   : auditHardBlock   ? "HARD_BLOCK"
                   :                   "FAIL",
       findingsCount: auditResult.findings.length,
-      model: process.env.GBSE_MODEL || "claude-sonnet-4-20250514",
+      model: process.env.GBSE_MODEL || "claude-sonnet-4-6",
     },
     raw: {
       solver:        solverResult.raw,

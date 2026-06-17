@@ -30,7 +30,7 @@ function buildProvenance() {
   } catch {}
   return {
     repoCommit,
-    model: process.env.GBSE_MODEL || 'claude-sonnet-4-20250514',
+    model: process.env.GBSE_MODEL || 'claude-sonnet-4-6',
     temperature: 0,
     runMode: process.env.GBSE_OFFICIAL ? 'official' : 'local',
   };
@@ -232,7 +232,7 @@ async function runBenchmark() {
 
   const summary = {
     timestamp: new Date().toISOString(),
-    model: process.env.GBSE_MODEL || "claude-sonnet-4-20250514",
+    model: process.env.GBSE_MODEL || "claude-sonnet-4-6",
     totalTests: TEST_SUITE.length,
     successful: successful.length,
     errors: allResults.length - successful.length,
