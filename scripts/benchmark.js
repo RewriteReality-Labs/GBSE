@@ -279,8 +279,14 @@ async function runBenchmark() {
     parsePercent(summary.metrics.avgFlagDetectionScore) >= 90 &&
     summary.metrics.mustNotPassFailureCount === 0 &&
     parsePercent(summary.metrics.silentHallucinationRate) <= 10 &&
-    Object.keys(summary.promptHashes).length > 0
+    Object.keys(summary.promptHashes).length > 0 &&
+    apiErrorRateValue < 5
   );
+
+  if (IS_OFFICIAL && !summary.officialValid) {
+    console.error("[GBSE] Official benchmark run did not meet predeclared gate conditions. officialValid = false.");
+    process.exitCode = 1;
+  }
 
 
   writeFileSync(RESULTS_FILE, JSON.stringify(summary, null, 2));
