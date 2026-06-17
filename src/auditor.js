@@ -30,7 +30,7 @@ export async function runAuditor(client, solverAnswer) {
   const maxTokens = parseInt(process.env.GBSE_MAX_TOKENS_AUDITOR || "2048", 10);
 
   const message = await client.messages.create({
-    model: process.env.GBSE_MODEL || "claude-sonnet-4-20250514",
+    model: process.env.GBSE_MODEL || "claude-sonnet-4-6",
     max_tokens: maxTokens,
     system: AUDITOR_PROMPT,
     messages: [

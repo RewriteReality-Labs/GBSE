@@ -33,7 +33,7 @@ SOLVER_PROMPT = load_prompt("solver")
 AUDITOR_PROMPT = load_prompt("auditor")
 RECONSTRUCTOR_PROMPT = load_prompt("reconstructor")
 
-MODEL = os.getenv("GBSE_MODEL", "claude-sonnet-4-20250514")
+MODEL = os.getenv("GBSE_MODEL", "claude-sonnet-4-6")
 # Ceiling is hard-capped at 10 — values above 10 are silently clamped.
 MAX_ITERATIONS = min(int(os.getenv("GBSE_MAX_ITERATIONS", "3")), 10)
 LOG_LEVEL = os.getenv("GBSE_LOG_LEVEL", "normal")
